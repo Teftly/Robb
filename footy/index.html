@@ -272,6 +272,37 @@
 
     h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
     .page-subtitle { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; }
+
+    /* COST CALCULATOR */
+    .calc-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-end;
+    }
+    .calc-row > div { flex: 1; }
+    .calc-result {
+      margin-top: 16px;
+      background: #e8f4ed;
+      border: 1.5px solid #b3d9c0;
+      border-radius: 10px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .calc-result-amount {
+      font-size: 2rem;
+      font-weight: 800;
+      color: var(--green);
+      line-height: 1;
+    }
+    .calc-result-label {
+      font-size: 0.88rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+    .calc-result-label strong { color: var(--text); display: block; font-size: 0.95rem; }
+    .calc-result.hidden { display: none; }
   </style>
 </head>
 <body>
@@ -317,6 +348,29 @@
 
       <label>Extra notes (optional)</label>
       <textarea id="game-notes" placeholder="e.g. Bring bibs, wear dark boots..."></textarea>
+    </div>
+
+    <!-- Cost Calculator -->
+    <div class="card">
+      <div class="card-title">💰 Cost Calculator</div>
+      <div class="calc-row">
+        <div>
+          <label>Total cost (£)</label>
+          <input type="number" id="calc-total" placeholder="e.g. 60" min="0" step="0.01" oninput="calcCost()" />
+        </div>
+        <div>
+          <label>Number going</label>
+          <input type="number" id="calc-players" placeholder="auto" min="1" step="1" oninput="calcCost()" />
+        </div>
+      </div>
+      <div class="hint">Leave "number going" blank to auto-count from your squads.</div>
+      <div class="calc-result hidden" id="calc-result">
+        <div class="calc-result-amount" id="calc-per-person">—</div>
+        <div class="calc-result-label">
+          <strong>per person</strong>
+          <span id="calc-breakdown"></span>
+        </div>
+      </div>
     </div>
 
     <!-- Teams -->
@@ -506,6 +560,8 @@
         <button class="btn btn-danger" onclick="removePlayer('${team}', ${i})">✕</button>
       </li>
     `).join('');
+
+    calcCost();
   }
 
   // ─── Save / Load ─────────────────────────────────────────
@@ -646,6 +702,30 @@
     fb.classList.add('show');
     setTimeout(() => fb.classList.remove('show'), 2000);
     refreshPreview();
+  }
+
+  // ─── Cost Calculator ─────────────────────────────────────
+  function calcCost() {
+    const totalInput = document.getElementById('calc-total').value;
+    const playersInput = document.getElementById('calc-players').value;
+
+    const total = parseFloat(totalInput);
+    const autoCount = state.teamA.length + state.teamB.length + state.subs.length;
+    const count = playersInput ? parseInt(playersInput) : autoCount;
+
+    const resultEl = document.getElementById('calc-result');
+    if (!totalInput || isNaN(total) || total <= 0 || count <= 0) {
+      resultEl.classList.add('hidden');
+      return;
+    }
+
+    const perPerson = total / count;
+    const perPersonStr = perPerson % 1 === 0 ? `£${perPerson}` : `£${perPerson.toFixed(2)}`;
+
+    document.getElementById('calc-per-person').textContent = perPersonStr;
+    document.getElementById('calc-breakdown').textContent =
+      `£${total.toFixed(2)} ÷ ${count} ${playersInput ? 'players' : 'players (auto)'}`;
+    resultEl.classList.remove('hidden');
   }
 
   // ─── Utils ───────────────────────────────────────────────
