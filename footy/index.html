@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Monday Footy Night</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --green: #1a7a3a;
+      --green-light: #22a34e;
+      --green-dark: #125c2b;
+      --yellow: #f5c518;
+      --bg: #f4f6f4;
+      --card: #ffffff;
+      --text: #1a1a1a;
+      --muted: #666;
+      --border: #dde8dd;
+      --red: #c0392b;
+      --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* NAV */
+    nav {
+      background: var(--green-dark);
+      padding: 0 20px;
+      display: flex;
+      align-items: center;
+      gap: 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+    .nav-logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--yellow);
+      padding: 14px 20px 14px 0;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: #fff; font-weight: 400; }
+    .nav-tabs { display: flex; margin-left: auto; }
+    .nav-tab {
+      color: rgba(255,255,255,0.7);
+      padding: 16px 20px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      font-weight: 500;
+      border-bottom: 3px solid transparent;
+      transition: all 0.15s;
+      text-decoration: none;
+      user-select: none;
+    }
+    .nav-tab:hover { color: #fff; }
+    .nav-tab.active { color: var(--yellow); border-bottom-color: var(--yellow); }
+
+    /* LAYOUT */
+    main { max-width: 700px; margin: 0 auto; padding: 28px 16px 60px; }
+
+    .page { display: none; }
+    .page.active { display: block; }
+
+    /* CARDS */
+    .card {
+      background: var(--card);
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      padding: 22px;
+      margin-bottom: 18px;
+      box-shadow: var(--shadow);
+    }
+    .card-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--green);
+      margin-bottom: 16px;
+    }
+
+    /* FORM */
+    label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--muted); margin-bottom: 5px; margin-top: 14px; }
+    label:first-of-type { margin-top: 0; }
+    input[type="text"], input[type="date"], input[type="time"], textarea, select {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      background: #fafcfa;
+      transition: border-color 0.15s;
+      color: var(--text);
+    }
+    input:focus, textarea:focus, select:focus {
+      outline: none;
+      border-color: var(--green-light);
+      background: #fff;
+    }
+    textarea { resize: vertical; min-height: 60px; }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--green); color: #fff; }
+    .btn-primary:hover { background: var(--green-light); }
+    .btn-yellow { background: var(--yellow); color: #1a1a1a; }
+    .btn-yellow:hover { background: #e8b800; }
+    .btn-ghost { background: transparent; color: var(--green); border: 1.5px solid var(--green); }
+    .btn-ghost:hover { background: var(--green); color: #fff; }
+    .btn-danger { background: transparent; color: var(--red); border: none; padding: 4px 8px; font-size: 0.85rem; }
+    .btn-danger:hover { background: #fde8e8; border-radius: 6px; }
+    .btn-sm { padding: 6px 12px; font-size: 0.82rem; }
+    .btn-full { width: 100%; justify-content: center; }
+
+    /* TEAMS GRID */
+    .teams-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 500px) { .teams-grid { grid-template-columns: 1fr; } }
+
+    .team-card {
+      border-radius: 10px;
+      padding: 16px;
+      border: 2px solid transparent;
+    }
+    .team-card.team-a { background: #e8f4ed; border-color: #b3d9c0; }
+    .team-card.team-b { background: #e8eef8; border-color: #b3c6e8; }
+
+    .team-name-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .team-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+    .team-dot.a { background: var(--green); }
+    .team-dot.b { background: #3a6bb5; }
+
+    .team-name-input {
+      flex: 1;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 6px 10px;
+      border-radius: 6px;
+    }
+    .team-card.team-a .team-name-input { background: #d0eedd; border-color: #9fcfb3; }
+    .team-card.team-b .team-name-input { background: #d0ddf5; border-color: #9fb5e8; }
+
+    .player-list { list-style: none; margin-bottom: 10px; }
+    .player-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      font-size: 0.92rem;
+    }
+    .player-item:last-child { border-bottom: none; }
+
+    .player-number {
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--muted);
+      width: 20px;
+      flex-shrink: 0;
+    }
+    .player-name { flex: 1; }
+
+    .add-player-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .add-player-row input { flex: 1; padding: 7px 10px; font-size: 0.88rem; }
+
+    /* SHARE PAGE */
+    .share-preview {
+      background: #e5ddd5;
+      border-radius: 12px;
+      padding: 18px;
+      font-family: 'Segoe UI', sans-serif;
+      white-space: pre-wrap;
+      font-size: 0.92rem;
+      line-height: 1.65;
+      color: #111;
+      border: 1px solid #d0c8c0;
+      min-height: 120px;
+    }
+    .wa-bubble {
+      background: #dcf8c6;
+      border-radius: 8px 8px 2px 8px;
+      padding: 10px 14px;
+      display: inline-block;
+      max-width: 90%;
+      white-space: pre-wrap;
+      line-height: 1.6;
+      font-size: 0.92rem;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.12);
+      word-break: break-word;
+    }
+
+    .copy-bar {
+      display: flex;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .copy-feedback {
+      font-size: 0.82rem;
+      color: var(--green);
+      font-weight: 600;
+      align-self: center;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .copy-feedback.show { opacity: 1; }
+
+    /* SAVE BAR */
+    .save-bar {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: var(--green-dark);
+      padding: 12px 20px;
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 -2px 12px rgba(0,0,0,0.15);
+    }
+
+    /* MISC */
+    .empty-state { color: var(--muted); font-size: 0.88rem; font-style: italic; padding: 6px 0; }
+    .row { display: flex; gap: 12px; }
+    .row > * { flex: 1; }
+    .section-divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+    .badge {
+      display: inline-block;
+      background: var(--green-light);
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 20px;
+      vertical-align: middle;
+      margin-left: 6px;
+    }
+
+    .hint { font-size: 0.78rem; color: var(--muted); margin-top: 4px; }
+
+    h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+    .page-subtitle { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">⚽ <span>Monday</span>Footy</div>
+  <div class="nav-tabs">
+    <div class="nav-tab active" onclick="showPage('admin')">Admin</div>
+    <div class="nav-tab" onclick="showPage('share')">Share</div>
+  </div>
+</nav>
+
+<main>
+
+  <!-- ADMIN PAGE -->
+  <div class="page active" id="page-admin">
+    <h2>Admin</h2>
+    <p class="page-subtitle">Set up this week's game details and squads.</p>
+
+    <!-- Game Details -->
+    <div class="card">
+      <div class="card-title">Game Details</div>
+
+      <div class="row">
+        <div>
+          <label>Date</label>
+          <input type="date" id="game-date" />
+        </div>
+        <div>
+          <label>Kick-off Time</label>
+          <input type="time" id="game-time" value="19:00" />
+        </div>
+      </div>
+
+      <label>Venue / Location</label>
+      <input type="text" id="game-venue" placeholder="e.g. Hackney Marshes, Pitch 4" />
+
+      <label>Address / Maps link</label>
+      <input type="text" id="game-address" placeholder="e.g. Homerton Rd, London E9 5PF" />
+
+      <label>Cost per player (optional)</label>
+      <input type="text" id="game-cost" placeholder="e.g. £5 cash on the night" />
+
+      <label>Extra notes (optional)</label>
+      <textarea id="game-notes" placeholder="e.g. Bring bibs, wear dark boots..."></textarea>
+    </div>
+
+    <!-- Teams -->
+    <div class="card">
+      <div class="card-title">Teams</div>
+      <div class="teams-grid">
+
+        <!-- Team A -->
+        <div class="team-card team-a">
+          <div class="team-name-row">
+            <div class="team-dot a"></div>
+            <input type="text" class="team-name-input" id="team-a-name" value="Bibs" placeholder="Team name" />
+          </div>
+          <ul class="player-list" id="team-a-list"></ul>
+          <div class="add-player-row">
+            <input type="text" id="team-a-input" placeholder="Player name…" onkeydown="if(event.key==='Enter') addPlayer('a')" />
+            <button class="btn btn-sm btn-primary" onclick="addPlayer('a')">+</button>
+          </div>
+        </div>
+
+        <!-- Team B -->
+        <div class="team-card team-b">
+          <div class="team-name-row">
+            <div class="team-dot b"></div>
+            <input type="text" class="team-name-input" id="team-b-name" value="No Bibs" placeholder="Team name" />
+          </div>
+          <ul class="player-list" id="team-b-list"></ul>
+          <div class="add-player-row">
+            <input type="text" id="team-b-input" placeholder="Player name…" onkeydown="if(event.key==='Enter') addPlayer('b')" />
+            <button class="btn btn-sm btn-primary" onclick="addPlayer('b')">+</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Subs -->
+    <div class="card">
+      <div class="card-title">Subs / Unassigned</div>
+      <ul class="player-list" id="subs-list"></ul>
+      <div class="add-player-row">
+        <input type="text" id="subs-input" placeholder="Player name…" onkeydown="if(event.key==='Enter') addPlayer('subs')" />
+        <button class="btn btn-sm btn-ghost" onclick="addPlayer('subs')">+ Sub</button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- SHARE PAGE -->
+  <div class="page" id="page-share">
+    <h2>Share</h2>
+    <p class="page-subtitle">Copy the message below and paste into your WhatsApp group.</p>
+
+    <div class="card">
+      <div class="card-title">Message Preview</div>
+      <div style="background:#e5ddd5; border-radius:10px; padding:14px 12px; overflow-x:auto;">
+        <div class="wa-bubble" id="wa-preview">Loading…</div>
+      </div>
+      <div class="copy-bar">
+        <button class="btn btn-yellow" onclick="copyMessage()">📋 Copy Message</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyMessage('plain')">Copy plain text</button>
+        <span class="copy-feedback" id="copy-feedback">Copied!</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Customise Message</div>
+      <label>Intro line (optional)</label>
+      <input type="text" id="custom-intro" placeholder="e.g. Right lads, footy is ON this Monday! 🔥" />
+      <div class="hint">Leave blank to use the default intro.</div>
+      <label>Outro / Sign-off (optional)</label>
+      <input type="text" id="custom-outro" placeholder="e.g. Let me know if you can't make it!" />
+      <div style="margin-top:14px">
+        <button class="btn btn-primary btn-sm" onclick="refreshPreview()">Refresh Preview</button>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<div class="save-bar">
+  <button class="btn btn-primary" onclick="saveData()">💾 Save</button>
+  <button class="btn btn-ghost" onclick="clearWeek()" style="color:#ccc; border-color:#666;">Clear Week</button>
+</div>
+
+<script>
+  // ─── State ───────────────────────────────────────────────
+  let state = {
+    date: '',
+    time: '19:00',
+    venue: '',
+    address: '',
+    cost: '',
+    notes: '',
+    teamAName: 'Bibs',
+    teamBName: 'No Bibs',
+    teamA: [],
+    teamB: [],
+    subs: [],
+    customIntro: '',
+    customOutro: '',
+  };
+
+  // ─── Init ─────────────────────────────────────────────────
+  function init() {
+    const saved = localStorage.getItem('footynight');
+    if (saved) state = { ...state, ...JSON.parse(saved) };
+
+    // Set next Monday as default date if no date saved
+    if (!state.date) {
+      const today = new Date();
+      const day = today.getDay();
+      const diff = day === 1 ? 7 : (8 - day) % 7;
+      const nextMon = new Date(today);
+      nextMon.setDate(today.getDate() + diff);
+      state.date = nextMon.toISOString().split('T')[0];
+    }
+
+    loadForm();
+    renderPlayers('a');
+    renderPlayers('b');
+    renderPlayers('subs');
+  }
+
+  function loadForm() {
+    document.getElementById('game-date').value = state.date;
+    document.getElementById('game-time').value = state.time;
+    document.getElementById('game-venue').value = state.venue;
+    document.getElementById('game-address').value = state.address;
+    document.getElementById('game-cost').value = state.cost;
+    document.getElementById('game-notes').value = state.notes;
+    document.getElementById('team-a-name').value = state.teamAName;
+    document.getElementById('team-b-name').value = state.teamBName;
+    document.getElementById('custom-intro').value = state.customIntro;
+    document.getElementById('custom-outro').value = state.customOutro;
+  }
+
+  // ─── Navigation ──────────────────────────────────────────
+  function showPage(page) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+    event.target.classList.add('active');
+    if (page === 'share') {
+      readForm();
+      refreshPreview();
+    }
+  }
+
+  // ─── Players ─────────────────────────────────────────────
+  function playerKey(team) {
+    return team === 'a' ? 'teamA' : team === 'b' ? 'teamB' : 'subs';
+  }
+
+  function addPlayer(team) {
+    const inputId = team === 'subs' ? 'subs-input' : `team-${team}-input`;
+    const input = document.getElementById(inputId);
+    const name = input.value.trim();
+    if (!name) return;
+    state[playerKey(team)].push(name);
+    input.value = '';
+    input.focus();
+    renderPlayers(team);
+  }
+
+  function removePlayer(team, index) {
+    state[playerKey(team)].splice(index, 1);
+    renderPlayers(team);
+  }
+
+  function renderPlayers(team) {
+    const key = playerKey(team);
+    const listId = team === 'subs' ? 'subs-list' : `team-${team}-list`;
+    const ul = document.getElementById(listId);
+    const players = state[key];
+
+    if (players.length === 0) {
+      ul.innerHTML = `<li class="empty-state">No players yet</li>`;
+      return;
+    }
+
+    ul.innerHTML = players.map((p, i) => `
+      <li class="player-item">
+        <span class="player-number">${i + 1}.</span>
+        <span class="player-name">${escHtml(p)}</span>
+        <button class="btn btn-danger" onclick="removePlayer('${team}', ${i})">✕</button>
+      </li>
+    `).join('');
+  }
+
+  // ─── Save / Load ─────────────────────────────────────────
+  function readForm() {
+    state.date      = document.getElementById('game-date').value;
+    state.time      = document.getElementById('game-time').value;
+    state.venue     = document.getElementById('game-venue').value.trim();
+    state.address   = document.getElementById('game-address').value.trim();
+    state.cost      = document.getElementById('game-cost').value.trim();
+    state.notes     = document.getElementById('game-notes').value.trim();
+    state.teamAName = document.getElementById('team-a-name').value.trim() || 'Team A';
+    state.teamBName = document.getElementById('team-b-name').value.trim() || 'Team B';
+    state.customIntro = document.getElementById('custom-intro').value.trim();
+    state.customOutro = document.getElementById('custom-outro').value.trim();
+  }
+
+  function saveData() {
+    readForm();
+    localStorage.setItem('footynight', JSON.stringify(state));
+    const btn = event.target;
+    btn.textContent = '✅ Saved!';
+    setTimeout(() => btn.textContent = '💾 Save', 1500);
+  }
+
+  function clearWeek() {
+    if (!confirm('Clear all player lists and game details for this week?')) return;
+    state = {
+      date: '', time: '19:00', venue: '', address: '',
+      cost: '', notes: '', teamAName: 'Bibs', teamBName: 'No Bibs',
+      teamA: [], teamB: [], subs: [], customIntro: '', customOutro: ''
+    };
+    localStorage.removeItem('footynight');
+    init();
+  }
+
+  // ─── Message Builder ─────────────────────────────────────
+  function formatDate(dateStr) {
+    if (!dateStr) return 'Monday';
+    const d = new Date(dateStr + 'T12:00:00');
+    return d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  function formatTime(timeStr) {
+    if (!timeStr) return '';
+    const [h, m] = timeStr.split(':');
+    const hour = parseInt(h);
+    const ampm = hour >= 12 ? 'pm' : 'am';
+    const h12 = hour % 12 || 12;
+    return m === '00' ? `${h12}${ampm}` : `${h12}:${m}${ampm}`;
+  }
+
+  function buildMessage() {
+    readForm();
+    const lines = [];
+
+    const intro = state.customIntro || `⚽ *Monday Night Footy is ON!*`;
+    lines.push(intro);
+    lines.push('');
+
+    // Date & time
+    const dateLine = [formatDate(state.date), state.time ? `@ ${formatTime(state.time)}` : ''].filter(Boolean).join(' ');
+    if (dateLine) lines.push(`📅 ${dateLine}`);
+
+    if (state.venue) lines.push(`📍 ${state.venue}`);
+    if (state.address) lines.push(`🗺️ ${state.address}`);
+    if (state.cost) lines.push(`💰 ${state.cost}`);
+    lines.push('');
+
+    // Teams
+    const hasA = state.teamA.length > 0;
+    const hasB = state.teamB.length > 0;
+
+    if (hasA || hasB) {
+      lines.push('👕 *Teams*');
+
+      if (hasA) {
+        lines.push('');
+        lines.push(`*${state.teamAName}* (${state.teamA.length})`);
+        state.teamA.forEach((p, i) => lines.push(`  ${i + 1}. ${p}`));
+      }
+
+      if (hasB) {
+        lines.push('');
+        lines.push(`*${state.teamBName}* (${state.teamB.length})`);
+        state.teamB.forEach((p, i) => lines.push(`  ${i + 1}. ${p}`));
+      }
+
+      lines.push('');
+    }
+
+    if (state.subs.length > 0) {
+      lines.push(`🔄 *Subs / Standby*`);
+      state.subs.forEach((p, i) => lines.push(`  ${i + 1}. ${p}`));
+      lines.push('');
+    }
+
+    if (state.notes) {
+      lines.push(`📝 ${state.notes}`);
+      lines.push('');
+    }
+
+    const outro = state.customOutro || `See you out there! 🏃‍♂️`;
+    lines.push(outro);
+
+    return lines.join('\n');
+  }
+
+  function refreshPreview() {
+    const msg = buildMessage();
+    const preview = document.getElementById('wa-preview');
+    // Render *bold* as <b>
+    preview.innerHTML = escHtml(msg)
+      .replace(/\*(.*?)\*/g, '<b>$1</b>')
+      .replace(/\n/g, '<br/>');
+  }
+
+  async function copyMessage(type) {
+    readForm();
+    let text = buildMessage();
+    // Strip markdown bold stars for plain text copy
+    if (type === 'plain') text = text.replace(/\*/g, '');
+
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      // Fallback
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+
+    const fb = document.getElementById('copy-feedback');
+    fb.classList.add('show');
+    setTimeout(() => fb.classList.remove('show'), 2000);
+    refreshPreview();
+  }
+
+  // ─── Utils ───────────────────────────────────────────────
+  function escHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ─── Boot ─────────────────────────────────────────────────
+  init();
+</script>
+</body>
+</html>
