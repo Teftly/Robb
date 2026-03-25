@@ -132,6 +132,47 @@
     .btn-sm { padding: 6px 12px; font-size: 0.82rem; }
     .btn-full { width: 100%; justify-content: center; }
 
+    /* MEMBERS */
+    .members-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      min-height: 40px;
+      padding: 4px 0;
+    }
+    .member-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #e8f4ed;
+      border: 1.5px solid #b3d9c0;
+      border-radius: 20px;
+      padding: 5px 8px 5px 12px;
+      font-size: 0.88rem;
+      font-weight: 500;
+      cursor: grab;
+      user-select: none;
+      transition: all 0.15s;
+    }
+    .member-chip:hover { background: #d0eedd; border-color: var(--green); }
+    .member-chip:active { cursor: grabbing; opacity: 0.7; }
+    .member-chip.dragging { opacity: 0.4; }
+    .member-remove {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--muted);
+      font-size: 0.75rem;
+      padding: 0 2px;
+      line-height: 1;
+    }
+    .member-remove:hover { color: var(--red); }
+    .drag-hint {
+      font-size: 0.78rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
     /* TEAMS GRID */
     .teams-grid {
       display: grid;
@@ -144,9 +185,20 @@
       border-radius: 10px;
       padding: 16px;
       border: 2px solid transparent;
+      transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
     }
     .team-card.team-a { background: #e8f4ed; border-color: #b3d9c0; }
     .team-card.team-b { background: #e8eef8; border-color: #b3c6e8; }
+    .team-card.drag-over {
+      border-color: var(--green) !important;
+      background: #c8ecda !important;
+      box-shadow: 0 0 0 3px rgba(26,122,58,0.2);
+    }
+    .team-card.team-b.drag-over {
+      border-color: #3a6bb5 !important;
+      background: #c4d5f5 !important;
+      box-shadow: 0 0 0 3px rgba(58,107,181,0.2);
+    }
 
     .team-name-row {
       display: flex;
@@ -194,6 +246,18 @@
       margin-top: 6px;
     }
     .add-player-row input { flex: 1; padding: 7px 10px; font-size: 0.88rem; }
+
+    /* SUBS DROP ZONE */
+    .subs-drop-zone {
+      border-radius: 8px;
+      border: 2px dashed var(--border);
+      padding: 12px;
+      transition: all 0.15s;
+    }
+    .subs-drop-zone.drag-over {
+      border-color: var(--green);
+      background: #e8f4ed;
+    }
 
     /* SHARE PAGE */
     .share-preview {
@@ -273,13 +337,7 @@
     h2 { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
     .page-subtitle { color: var(--muted); font-size: 0.88rem; margin-bottom: 22px; }
 
-    /* COST CALCULATOR */
-    .calc-row {
-      display: flex;
-      gap: 12px;
-      align-items: flex-end;
-    }
-    .calc-row > div { flex: 1; }
+    /* VENUE COST */
     .calc-result {
       margin-top: 16px;
       background: #e8f4ed;
@@ -343,33 +401,33 @@
       <label>Address / Maps link</label>
       <input type="text" id="game-address" placeholder="e.g. Homerton Rd, London E9 5PF" />
 
-      <label>Cost per player (optional)</label>
-      <input type="text" id="game-cost" placeholder="e.g. £5 cash on the night" />
-
       <label>Extra notes (optional)</label>
       <textarea id="game-notes" placeholder="e.g. Bring bibs, wear dark boots..."></textarea>
     </div>
 
-    <!-- Cost Calculator -->
+    <!-- Venue Cost -->
     <div class="card">
-      <div class="card-title">💰 Cost Calculator</div>
-      <div class="calc-row">
-        <div>
-          <label>Total cost (£)</label>
-          <input type="number" id="calc-total" placeholder="e.g. 60" min="0" step="0.01" oninput="calcCost()" />
-        </div>
-        <div>
-          <label>Number going</label>
-          <input type="number" id="calc-players" placeholder="auto" min="1" step="1" oninput="calcCost()" />
-        </div>
-      </div>
-      <div class="hint">Leave "number going" blank to auto-count from your squads.</div>
+      <div class="card-title">💰 Venue Cost</div>
+      <label>Venue price (£)</label>
+      <input type="number" id="calc-venue" placeholder="e.g. 60" min="0" step="0.01" oninput="calcCost()" />
+      <div class="hint">Price per head is auto-calculated from the total number of players.</div>
       <div class="calc-result hidden" id="calc-result">
         <div class="calc-result-amount" id="calc-per-person">—</div>
         <div class="calc-result-label">
-          <strong>per person</strong>
+          <strong>price per head</strong>
           <span id="calc-breakdown"></span>
         </div>
+      </div>
+    </div>
+
+    <!-- Members -->
+    <div class="card">
+      <div class="card-title">👥 Members</div>
+      <p class="drag-hint">Your permanent squad roster. Drag a name into a team below, or use the + buttons.</p>
+      <div id="members-list" class="members-grid"></div>
+      <div class="add-player-row" style="margin-top:12px">
+        <input type="text" id="member-input" placeholder="Add member…" onkeydown="if(event.key==='Enter') addMember()" />
+        <button class="btn btn-sm btn-primary" onclick="addMember()">+</button>
       </div>
     </div>
 
@@ -379,7 +437,10 @@
       <div class="teams-grid">
 
         <!-- Team A -->
-        <div class="team-card team-a">
+        <div class="team-card team-a"
+             ondragover="dragOver(event)"
+             ondragleave="dragLeave(event)"
+             ondrop="drop(event, 'a')">
           <div class="team-name-row">
             <div class="team-dot a"></div>
             <input type="text" class="team-name-input" id="team-a-name" value="Bibs" placeholder="Team name" />
@@ -392,7 +453,10 @@
         </div>
 
         <!-- Team B -->
-        <div class="team-card team-b">
+        <div class="team-card team-b"
+             ondragover="dragOver(event)"
+             ondragleave="dragLeave(event)"
+             ondrop="drop(event, 'b')">
           <div class="team-name-row">
             <div class="team-dot b"></div>
             <input type="text" class="team-name-input" id="team-b-name" value="No Bibs" placeholder="Team name" />
@@ -410,10 +474,15 @@
     <!-- Subs -->
     <div class="card">
       <div class="card-title">Subs / Unassigned</div>
-      <ul class="player-list" id="subs-list"></ul>
-      <div class="add-player-row">
-        <input type="text" id="subs-input" placeholder="Player name…" onkeydown="if(event.key==='Enter') addPlayer('subs')" />
-        <button class="btn btn-sm btn-ghost" onclick="addPlayer('subs')">+ Sub</button>
+      <div class="subs-drop-zone"
+           ondragover="dragOver(event)"
+           ondragleave="dragLeave(event)"
+           ondrop="drop(event, 'subs')">
+        <ul class="player-list" id="subs-list"></ul>
+        <div class="add-player-row">
+          <input type="text" id="subs-input" placeholder="Player name…" onkeydown="if(event.key==='Enter') addPlayer('subs')" />
+          <button class="btn btn-sm btn-ghost" onclick="addPlayer('subs')">+ Sub</button>
+        </div>
       </div>
     </div>
 
@@ -464,7 +533,7 @@
     time: '19:00',
     venue: '',
     address: '',
-    cost: '',
+    venuePrice: '',
     notes: '',
     teamAName: 'Bibs',
     teamBName: 'No Bibs',
@@ -475,10 +544,16 @@
     customOutro: '',
   };
 
+  // Members are stored separately so they persist across Clear Week
+  let members = [];
+
   // ─── Init ─────────────────────────────────────────────────
   function init() {
     const saved = localStorage.getItem('footynight');
     if (saved) state = { ...state, ...JSON.parse(saved) };
+
+    const savedMembers = localStorage.getItem('footyMembers');
+    if (savedMembers) members = JSON.parse(savedMembers);
 
     // Set next Monday as default date if no date saved
     if (!state.date) {
@@ -491,6 +566,7 @@
     }
 
     loadForm();
+    renderMembers();
     renderPlayers('a');
     renderPlayers('b');
     renderPlayers('subs');
@@ -501,12 +577,15 @@
     document.getElementById('game-time').value = state.time;
     document.getElementById('game-venue').value = state.venue;
     document.getElementById('game-address').value = state.address;
-    document.getElementById('game-cost').value = state.cost;
     document.getElementById('game-notes').value = state.notes;
     document.getElementById('team-a-name').value = state.teamAName;
     document.getElementById('team-b-name').value = state.teamBName;
     document.getElementById('custom-intro').value = state.customIntro;
     document.getElementById('custom-outro').value = state.customOutro;
+    if (state.venuePrice) {
+      document.getElementById('calc-venue').value = state.venuePrice;
+      calcCost();
+    }
   }
 
   // ─── Navigation ──────────────────────────────────────────
@@ -519,6 +598,83 @@
       readForm();
       refreshPreview();
     }
+  }
+
+  // ─── Members ─────────────────────────────────────────────
+  function addMember() {
+    const input = document.getElementById('member-input');
+    const name = input.value.trim();
+    if (!name) return;
+    if (!members.includes(name)) members.push(name);
+    input.value = '';
+    input.focus();
+    saveMembers();
+    renderMembers();
+  }
+
+  function removeMember(index) {
+    members.splice(index, 1);
+    saveMembers();
+    renderMembers();
+  }
+
+  function saveMembers() {
+    localStorage.setItem('footyMembers', JSON.stringify(members));
+  }
+
+  function renderMembers() {
+    const container = document.getElementById('members-list');
+    if (members.length === 0) {
+      container.innerHTML = '<span class="empty-state">No members yet — add some above</span>';
+      return;
+    }
+    container.innerHTML = members.map((m, i) => `
+      <div class="member-chip"
+           draggable="true"
+           ondragstart="dragStart(event, '${escAttr(m)}')"
+           ondragend="dragEnd(event)"
+           title="Drag into a team">
+        <span>${escHtml(m)}</span>
+        <button class="member-remove" onclick="removeMember(${i})" title="Remove from roster">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // ─── Drag and Drop ───────────────────────────────────────
+  let draggedName = '';
+
+  function dragStart(event, name) {
+    draggedName = name;
+    event.dataTransfer.effectAllowed = 'copy';
+    event.dataTransfer.setData('text/plain', name);
+    event.currentTarget.classList.add('dragging');
+  }
+
+  function dragEnd(event) {
+    event.currentTarget.classList.remove('dragging');
+  }
+
+  function dragOver(event) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = 'copy';
+    event.currentTarget.classList.add('drag-over');
+  }
+
+  function dragLeave(event) {
+    event.currentTarget.classList.remove('drag-over');
+  }
+
+  function drop(event, team) {
+    event.preventDefault();
+    event.currentTarget.classList.remove('drag-over');
+    const name = draggedName || event.dataTransfer.getData('text/plain');
+    if (!name) return;
+    const key = playerKey(team);
+    if (!state[key].includes(name)) {
+      state[key].push(name);
+      renderPlayers(team);
+    }
+    draggedName = '';
   }
 
   // ─── Players ─────────────────────────────────────────────
@@ -550,30 +706,29 @@
 
     if (players.length === 0) {
       ul.innerHTML = `<li class="empty-state">No players yet</li>`;
-      return;
+    } else {
+      ul.innerHTML = players.map((p, i) => `
+        <li class="player-item">
+          <span class="player-number">${i + 1}.</span>
+          <span class="player-name">${escHtml(p)}</span>
+          <button class="btn btn-danger" onclick="removePlayer('${team}', ${i})">✕</button>
+        </li>
+      `).join('');
     }
-
-    ul.innerHTML = players.map((p, i) => `
-      <li class="player-item">
-        <span class="player-number">${i + 1}.</span>
-        <span class="player-name">${escHtml(p)}</span>
-        <button class="btn btn-danger" onclick="removePlayer('${team}', ${i})">✕</button>
-      </li>
-    `).join('');
 
     calcCost();
   }
 
   // ─── Save / Load ─────────────────────────────────────────
   function readForm() {
-    state.date      = document.getElementById('game-date').value;
-    state.time      = document.getElementById('game-time').value;
-    state.venue     = document.getElementById('game-venue').value.trim();
-    state.address   = document.getElementById('game-address').value.trim();
-    state.cost      = document.getElementById('game-cost').value.trim();
-    state.notes     = document.getElementById('game-notes').value.trim();
-    state.teamAName = document.getElementById('team-a-name').value.trim() || 'Team A';
-    state.teamBName = document.getElementById('team-b-name').value.trim() || 'Team B';
+    state.date        = document.getElementById('game-date').value;
+    state.time        = document.getElementById('game-time').value;
+    state.venue       = document.getElementById('game-venue').value.trim();
+    state.address     = document.getElementById('game-address').value.trim();
+    state.venuePrice  = document.getElementById('calc-venue').value.trim();
+    state.notes       = document.getElementById('game-notes').value.trim();
+    state.teamAName   = document.getElementById('team-a-name').value.trim() || 'Team A';
+    state.teamBName   = document.getElementById('team-b-name').value.trim() || 'Team B';
     state.customIntro = document.getElementById('custom-intro').value.trim();
     state.customOutro = document.getElementById('custom-outro').value.trim();
   }
@@ -587,13 +742,15 @@
   }
 
   function clearWeek() {
-    if (!confirm('Clear all player lists and game details for this week?')) return;
+    if (!confirm('Clear all player lists and game details for this week? (Members roster will be kept.)')) return;
     state = {
       date: '', time: '19:00', venue: '', address: '',
-      cost: '', notes: '', teamAName: 'Bibs', teamBName: 'No Bibs',
+      venuePrice: '', notes: '', teamAName: 'Bibs', teamBName: 'No Bibs',
       teamA: [], teamB: [], subs: [], customIntro: '', customOutro: ''
     };
     localStorage.removeItem('footynight');
+    document.getElementById('calc-venue').value = '';
+    document.getElementById('calc-result').classList.add('hidden');
     init();
   }
 
@@ -621,16 +778,25 @@
     lines.push(intro);
     lines.push('');
 
-    // Date & time
     const dateLine = [formatDate(state.date), state.time ? `@ ${formatTime(state.time)}` : ''].filter(Boolean).join(' ');
     if (dateLine) lines.push(`📅 ${dateLine}`);
 
     if (state.venue) lines.push(`📍 ${state.venue}`);
     if (state.address) lines.push(`🗺️ ${state.address}`);
-    if (state.cost) lines.push(`💰 ${state.cost}`);
+
+    // Auto-compute price per head
+    if (state.venuePrice) {
+      const total = parseFloat(state.venuePrice);
+      const count = state.teamA.length + state.teamB.length + state.subs.length;
+      if (!isNaN(total) && total > 0 && count > 0) {
+        const perHead = total / count;
+        const perHeadStr = perHead % 1 === 0 ? `£${perHead}` : `£${perHead.toFixed(2)}`;
+        lines.push(`💰 ${perHeadStr} per head`);
+      }
+    }
+
     lines.push('');
 
-    // Teams
     const hasA = state.teamA.length > 0;
     const hasB = state.teamB.length > 0;
 
@@ -672,7 +838,6 @@
   function refreshPreview() {
     const msg = buildMessage();
     const preview = document.getElementById('wa-preview');
-    // Render *bold* as <b>
     preview.innerHTML = escHtml(msg)
       .replace(/\*(.*?)\*/g, '<b>$1</b>')
       .replace(/\n/g, '<br/>');
@@ -681,13 +846,11 @@
   async function copyMessage(type) {
     readForm();
     let text = buildMessage();
-    // Strip markdown bold stars for plain text copy
     if (type === 'plain') text = text.replace(/\*/g, '');
 
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      // Fallback
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
@@ -706,15 +869,12 @@
 
   // ─── Cost Calculator ─────────────────────────────────────
   function calcCost() {
-    const totalInput = document.getElementById('calc-total').value;
-    const playersInput = document.getElementById('calc-players').value;
-
-    const total = parseFloat(totalInput);
-    const autoCount = state.teamA.length + state.teamB.length + state.subs.length;
-    const count = playersInput ? parseInt(playersInput) : autoCount;
+    const venueInput = document.getElementById('calc-venue').value;
+    const total = parseFloat(venueInput);
+    const count = state.teamA.length + state.teamB.length + state.subs.length;
 
     const resultEl = document.getElementById('calc-result');
-    if (!totalInput || isNaN(total) || total <= 0 || count <= 0) {
+    if (!venueInput || isNaN(total) || total <= 0 || count <= 0) {
       resultEl.classList.add('hidden');
       return;
     }
@@ -724,13 +884,17 @@
 
     document.getElementById('calc-per-person').textContent = perPersonStr;
     document.getElementById('calc-breakdown').textContent =
-      `£${total.toFixed(2)} ÷ ${count} ${playersInput ? 'players' : 'players (auto)'}`;
+      `£${total.toFixed(2)} ÷ ${count} players`;
     resultEl.classList.remove('hidden');
   }
 
   // ─── Utils ───────────────────────────────────────────────
   function escHtml(str) {
-    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function escAttr(str) {
+    return String(str).replace(/'/g,'&#39;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
   // ─── Boot ─────────────────────────────────────────────────
