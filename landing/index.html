@@ -522,6 +522,53 @@
       color: rgba(100,96,64,0.4);
     }
 
+    /* ── FIGHT SCENE ── */
+    .fight-section { position: relative; z-index: 1; padding: 2rem 0 0; }
+
+    .fight-dialog-inner {
+      background: var(--ui-bg);
+      border: 2px solid var(--ui-border);
+      padding: 1rem 1.5rem;
+      min-height: 5.5rem;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      margin-bottom: 0;
+    }
+    .fight-dialog-inner::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(24,80,160,0.2);
+      pointer-events: none;
+    }
+    .fight-speaker {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.42rem;
+      color: var(--gold);
+      letter-spacing: 0.14em;
+      margin-bottom: 0.5rem;
+      min-height: 1em;
+    }
+    .fight-text {
+      font-size: 1.35rem;
+      color: var(--parchment);
+      line-height: 1.6;
+    }
+    .fight-text.comeback { color: var(--cyan); }
+
+    #fight-canvas {
+      display: block;
+      width: 100%;
+      max-width: 780px;
+      margin: 0 auto;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+
     /* ── HINT ── */
     .hint {
       text-align: center;
@@ -806,6 +853,15 @@
     </div>
   </section>
 
+  <!-- ═══ SWORDFIGHT ═══ -->
+  <div class="fight-section">
+    <div class="fight-dialog-inner">
+      <div class="fight-speaker" id="fight-speaker">—</div>
+      <div class="fight-text" id="fight-text">...</div>
+    </div>
+    <canvas id="fight-canvas"></canvas>
+  </div>
+
 </div><!-- .content -->
 
 <!-- ═══ ISLAND SCENE ═══ -->
@@ -948,6 +1004,257 @@
   }
 
   document.getElementById('music-close').addEventListener('click', closeMusic);
+
+  // ── SWORDFIGHT ANIMATION ─────────────────────────────────────
+  (function () {
+    const canvas  = document.getElementById('fight-canvas');
+    const ctx     = canvas.getContext('2d');
+    const speakerEl = document.getElementById('fight-speaker');
+    const textEl    = document.getElementById('fight-text');
+
+    const INSULTS = [
+      ["You fight like a dairy farmer!",                       "How appropriate, you fight like a cow!"],
+      ["This is the END for you, you gutter crawling cur!",    "And I've got a little TIP for you, get the POINT?"],
+      ["I once owned a dog that was smarter than you.",        "He must have taught you everything you know."],
+      ["Nobody's ever drawn blood from me and nobody ever will.", "You run THAT fast?"],
+      ["Have you stopped wearing diapers yet?",                "Why? Did you want to borrow one?"],
+      ["People fall at my feet when they see me coming.",      "Even BEFORE they smell your breath?"],
+      ["You make me want to puke.",                            "You make me think somebody already did."],
+      ["My tongue is sharper than any sword.",                 "First you'd better stop waving it like a feather duster."],
+      ["I got this scar on my face during a mighty struggle!", "I hope now you've learned to stop picking your nose."],
+      ["You're no match for my brains, you poor fool.",        "I'd be in real trouble if you ever used them."],
+      ["I've spoken with apes more polite than you.",          "I'm glad to hear you attended your family reunion."],
+      ["Every enemy I've ever had ends up dead.",              "Your enemies must lead extremely dull lives."],
+    ];
+
+    let idx = 0, phase = 'idle', timer = 0, t0 = 0;
+    let sparks = [];
+    let sc = 3, midX, guyX, oppX, groundY;
+
+    const DUR = { idle: 700, insult: 2800, comeback: 2800, clash: 550, stagger: 900 };
+
+    function resize() {
+      const w = Math.min(canvas.parentElement.offsetWidth, 780);
+      canvas.width  = w;
+      canvas.height = 115;
+      sc      = w < 480 ? 2 : 3;
+      midX    = Math.floor(w / 2);
+      // Position characters so sword tips meet at midX during attack (lunge=2, tip_offset=26 game px)
+      guyX    = midX - 28 * sc;
+      oppX    = midX + 28 * sc;
+      groundY = canvas.height - 10;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // ── pixel rect helper (game-pixel coords) ──
+    function px(c, x, y, w, h, s) {
+      ctx.fillStyle = c;
+      ctx.fillRect(x * s, y * s, w * s, h * s);
+    }
+
+    // ── Guybrush (facing right, pony-tail blond, blue vest) ──
+    function drawGuybrush(cx, cy, s, pose) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      if (pose === 1) ctx.translate( 2 * s, 0);  // lunge forward
+      if (pose === 2) ctx.translate(-3 * s, 0);  // stagger back
+
+      // Hat
+      px('#280e04', 3,0,7,1,s);
+      px('#1c0a04', 2,1,9,2,s);
+      px('#280e04', 1,3,11,1,s);
+      // Hair (blond, sides)
+      px('#c09820', 3,4,2,1,s);
+      px('#c09820', 9,4,2,1,s);
+      // Pony tail hint
+      px('#c09820', 11,5,2,2,s);
+      // Face
+      px('#c0a46c', 3,4,8,5,s);
+      px('#0c0804', 5,5,1,1,s); // eye L
+      px('#0c0804', 8,5,1,1,s); // eye R
+      // Stubble hint
+      px('#a07040', 4,8,1,1,s);
+      px('#a07040', 6,8,1,1,s);
+      // Neck
+      px('#c0a46c', 5,9,3,1,s);
+      // Shirt
+      px('#ccc890', 3,10,8,5,s);
+      // Vest (blue)
+      px('#1a3050', 2,10,2,5,s);
+      px('#1a3050',10,10,2,5,s);
+      // Belt
+      px('#0a0c18', 2,15,9,1,s);
+      px('#b88018', 5,15,2,1,s);
+      // Pants
+      px('#10182a', 2,16,3,5,s);
+      px('#10182a', 8,16,3,5,s);
+      // Boots
+      px('#080810', 2,21,3,3,s);
+      px('#080810', 8,21,3,3,s);
+      // Sword arm
+      px('#ccc890',12,10,3,2,s);
+      px('#c0a46c',14,10,2,2,s);
+      // Sword
+      const sLen = pose === 1 ? 12 : 9;
+      px('#b89020',15, 9,1,3,s);      // guard (gold)
+      px('#8aa8bc',16,10,sLen,1,s);   // blade
+      px('#c8e0ee',16,10,sLen,1,s);   // blade shine (overdrawn lighter)
+
+      ctx.restore();
+    }
+
+    // ── Sword Master (faces left, red hat, dark coat) ──
+    function drawSwordMaster(cx, cy, s, pose) {
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.scale(-1, 1); // mirror to face left
+      if (pose === 1) ctx.translate( 2 * s, 0);  // lunge (mirror = moves left on screen)
+      if (pose === 2) ctx.translate(-3 * s, 0);
+
+      // Red hat
+      px('#600808', 3,0,7,1,s);
+      px('#480606', 2,1,9,2,s);
+      px('#600808', 1,3,11,1,s);
+      // Hat feather
+      px('#c8c020',11,0,3,1,s);
+      px('#c8c020',12,1,2,1,s);
+      // Dark hair
+      px('#1a0c04', 3,4,2,1,s);
+      px('#1a0c04', 9,4,2,1,s);
+      // Face
+      px('#b48860', 3,4,8,5,s);
+      px('#100804', 5,5,1,1,s);
+      px('#100804', 8,5,1,1,s);
+      // Neck
+      px('#b48860', 5,9,3,1,s);
+      // Shirt (dark)
+      px('#3c3028', 3,10,8,5,s);
+      // Dark coat
+      px('#1a2820', 2,10,2,5,s);
+      px('#1a2820',10,10,2,5,s);
+      // Belt
+      px('#0a0c18', 2,15,9,1,s);
+      px('#c09020', 5,15,2,1,s);
+      // Pants (brown)
+      px('#1c1408', 2,16,3,5,s);
+      px('#1c1408', 8,16,3,5,s);
+      // Boots
+      px('#080810', 2,21,3,3,s);
+      px('#080810', 8,21,3,3,s);
+      // Sword arm
+      px('#3c3028',12,10,3,2,s);
+      px('#b48860',14,10,2,2,s);
+      // Sword
+      const sLen = pose === 1 ? 12 : 9;
+      px('#a07818',15, 9,1,3,s);
+      px('#8898ac',16,10,sLen,1,s);
+      px('#b0c8d8',16,10,sLen,1,s);
+
+      ctx.restore();
+    }
+
+    // ── Sparks ──
+    function burst(x, y, n) {
+      for (let i = 0; i < n; i++) {
+        const a = Math.random() * Math.PI * 2;
+        const v = 1.5 + Math.random() * 3.5;
+        sparks.push({
+          x, y,
+          vx: Math.cos(a) * v,
+          vy: Math.sin(a) * v - 1.5,
+          life: 0.9 + Math.random() * 0.4,
+          col: Math.random() > 0.45 ? '#f0c030' : (Math.random() > 0.5 ? '#e85020' : '#fff8c0'),
+          sz: 2 + Math.floor(Math.random() * 3),
+        });
+      }
+    }
+
+    // ── Main loop ──
+    function loop(now) {
+      const dt = Math.min(now - (t0 || now), 60);
+      t0 = now;
+      timer += dt;
+
+      // Phase transitions
+      if (timer >= DUR[phase]) {
+        timer = 0;
+        switch (phase) {
+          case 'idle':
+            phase = 'insult';
+            speakerEl.textContent = 'GUYBRUSH THREEPWOOD';
+            speakerEl.style.color = '#f0c840';
+            textEl.textContent = INSULTS[idx][0];
+            textEl.className = 'fight-text';
+            break;
+          case 'insult':
+            phase = 'comeback';
+            speakerEl.textContent = 'THE SWORD MASTER';
+            speakerEl.style.color = '#48d8e0';
+            textEl.textContent = INSULTS[idx][1];
+            textEl.className = 'fight-text comeback';
+            break;
+          case 'comeback':
+            phase = 'clash';
+            burst(midX, groundY - 12 * sc, 22);
+            break;
+          case 'clash':
+            phase = 'stagger';
+            break;
+          case 'stagger':
+            phase = 'idle';
+            idx = (idx + 1) % INSULTS.length;
+            speakerEl.textContent = '—';
+            textEl.textContent = '...';
+            textEl.className = 'fight-text';
+            break;
+        }
+      }
+
+      // Update sparks
+      for (const s of sparks) {
+        s.x  += s.vx * dt * 0.055;
+        s.y  += s.vy * dt * 0.055;
+        s.vy += dt * 0.004;
+        s.life -= dt * 0.0028;
+      }
+      sparks = sparks.filter(s => s.life > 0);
+
+      // Character poses
+      let gPose = 0, oPose = 0;
+      if (phase === 'insult')   gPose = 1;
+      if (phase === 'comeback') oPose = 1;
+      if (phase === 'clash')  { gPose = 1; oPose = 1; }
+      if (phase === 'stagger')  gPose = 2;
+
+      // Bob
+      const bob = Math.round(Math.sin(now * 0.0022) * 1.5);
+
+      // ── Draw ──
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Ground strip
+      ctx.fillStyle = '#06080e';
+      ctx.fillRect(0, canvas.height - 8, canvas.width, 8);
+      ctx.fillStyle = '#0c1828';
+      ctx.fillRect(0, canvas.height - 9, canvas.width, 1);
+
+      drawGuybrush  (guyX, groundY + bob,    sc, gPose);
+      drawSwordMaster(oppX, groundY - bob,   sc, oPose);
+
+      // Sparks
+      for (const s of sparks) {
+        ctx.globalAlpha = Math.max(0, s.life);
+        ctx.fillStyle   = s.col;
+        ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.sz, s.sz);
+      }
+      ctx.globalAlpha = 1;
+
+      requestAnimationFrame(loop);
+    }
+
+    requestAnimationFrame(loop);
+  })();
 </script>
 </body>
 </html>
