@@ -973,6 +973,51 @@
     const ctx    = canvas.getContext('2d');
     let stars = [], lights = [];
 
+    // Mountain silhouette points (normalised 0–1)
+    const MTN = [
+      [0,    1  ],
+      [0,    0.64],
+      [0.04, 0.60],
+      [0.07, 0.54],
+      [0.10, 0.57],
+      [0.14, 0.51],
+      [0.17, 0.55],
+      [0.21, 0.45],
+      [0.25, 0.50],
+      [0.29, 0.40],
+      [0.32, 0.44],
+      [0.36, 0.33],
+      [0.39, 0.37],
+      [0.43, 0.22],
+      [0.46, 0.26],
+      [0.48, 0.07], // peak
+      [0.50, 0.11],
+      [0.54, 0.18],
+      [0.58, 0.24],
+      [0.62, 0.29],
+      [0.66, 0.34],
+      [0.69, 0.29], // right shoulder ledge
+      [0.72, 0.37],
+      [0.76, 0.43],
+      [0.80, 0.49],
+      [0.84, 0.45],
+      [0.88, 0.53],
+      [0.92, 0.59],
+      [0.96, 0.63],
+      [1,    0.65],
+      [1,    1   ],
+    ];
+
+    // The winding path — points chosen to sit ON the mountain face
+    const PATH = [
+      [0.14, 0.88], [0.16, 0.83], [0.13, 0.78],
+      [0.17, 0.73], [0.20, 0.68], [0.18, 0.63],
+      [0.22, 0.57], [0.25, 0.52], [0.23, 0.47],
+      [0.27, 0.42], [0.30, 0.37], [0.28, 0.32],
+      [0.32, 0.27], [0.36, 0.22], [0.39, 0.17],
+      [0.43, 0.13], [0.46, 0.09],
+    ];
+
     function resize() {
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
@@ -985,12 +1030,12 @@
       const n = Math.floor((canvas.width * canvas.height) / 3200);
       for (let i = 0; i < n; i++) {
         stars.push({
-          x:      Math.random() * canvas.width,
-          y:      Math.random() * canvas.height * 0.58,
-          sz:     Math.random() < 0.88 ? 1 : 2,
-          base:   0.25 + Math.random() * 0.65,
-          spd:    0.3  + Math.random() * 1.1,
-          off:    Math.random() * Math.PI * 2,
+          x:   Math.random() * canvas.width,
+          y:   Math.random() * canvas.height * 0.55,
+          sz:  Math.random() < 0.88 ? 1 : 2,
+          base:0.25 + Math.random() * 0.65,
+          spd: 0.3  + Math.random() * 1.1,
+          off: Math.random() * Math.PI * 2,
         });
       }
     }
@@ -998,65 +1043,62 @@
     function buildLights() {
       lights = [];
       const W = canvas.width, H = canvas.height;
-      // Village torches clustered at lower-left base
-      for (let i = 0; i < 28; i++) {
+
+      // Village cluster — at the true base of the mountain (low y ≈ 0.80–0.91)
+      for (let i = 0; i < 34; i++) {
         lights.push({
-          x:    W * (0.08 + Math.random() * 0.18),
-          y:    H * (0.64 + Math.random() * 0.12),
-          spd:  0.8 + Math.random() * 2.4,
+          x:    W * (0.07 + Math.random() * 0.14),
+          y:    H * (0.80 + Math.random() * 0.11),
+          spd:  0.8 + Math.random() * 2.5,
           off:  Math.random() * Math.PI * 2,
           sz:   1 + Math.floor(Math.random() * 2),
           kind: 'village',
         });
       }
-      // Path torches winding up
-      const path = [
-        [0.21,0.64],[0.23,0.59],[0.26,0.54],[0.24,0.49],
-        [0.28,0.44],[0.31,0.39],[0.29,0.34],[0.33,0.29],
-        [0.36,0.24],[0.39,0.19],[0.42,0.14],
-      ];
-      for (const [px,py] of path) {
+
+      // Torches along the path (every other point)
+      for (let i = 0; i < PATH.length; i += 2) {
+        const [px, py] = PATH[i];
         lights.push({
-          x: W*px, y: H*py,
-          spd: 1.2 + Math.random() * 2,
-          off: Math.random() * Math.PI * 2,
-          sz: 2, kind: 'torch',
+          x:    W * px,
+          y:    H * py,
+          spd:  1.0 + Math.random() * 2.2,
+          off:  Math.random() * Math.PI * 2,
+          sz:   2,
+          kind: 'torch',
         });
       }
     }
 
-    // Chunky pixel-art cloud block
+    // Chunky pixel-art cloud
     function cloud(x, y, sc) {
       const blocks = [
         [0,3,5,3],[3,1,6,5],[8,0,7,6],[14,1,6,5],
         [18,3,5,3],[5,0,4,2],[11,-1,5,2],
       ];
       for (const [bx,by,bw,bh] of blocks) {
-        // Slight depth: inner blocks brighter
-        const bright = (bx > 4 && bx < 16) ? '#7890e8' : '#4a68c8';
-        ctx.fillStyle = bright;
+        ctx.fillStyle = (bx > 4 && bx < 16) ? '#7890e8' : '#4a68c8';
         ctx.fillRect(Math.floor(x+bx*sc), Math.floor(y+by*sc), bw*sc, bh*sc);
       }
-      // Bright top highlights
       ctx.fillStyle = '#a0b4f8';
-      ctx.fillRect(Math.floor(x+8*sc),  Math.floor(y), 3*sc, sc);
-      ctx.fillRect(Math.floor(x+3*sc),  Math.floor(y+sc), 2*sc, sc);
+      ctx.fillRect(Math.floor(x+8*sc), Math.floor(y), 3*sc, sc);
+      ctx.fillRect(Math.floor(x+3*sc), Math.floor(y+sc), 2*sc, sc);
     }
 
     function draw(t) {
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
 
-      // ── Sky gradient ──
+      // Sky
       const sky = ctx.createLinearGradient(0, 0, 0, H);
-      sky.addColorStop(0,   '#010610');
-      sky.addColorStop(0.45,'#030e26');
-      sky.addColorStop(0.72,'#051430');
-      sky.addColorStop(1,   '#040a1c');
+      sky.addColorStop(0,    '#010610');
+      sky.addColorStop(0.45, '#030e26');
+      sky.addColorStop(0.72, '#051430');
+      sky.addColorStop(1,    '#040a1c');
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H);
 
-      // ── Stars ──
+      // Stars (sky only)
       for (const s of stars) {
         const a = Math.max(0.06, Math.min(1,
           s.base + Math.sin(t * 0.001 * s.spd + s.off) * 0.28));
@@ -1064,109 +1106,83 @@
         ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.sz, s.sz);
       }
 
-      // ── Pixel clouds (upper-right) ──
+      // Clouds (upper-right)
       const csc = Math.max(3, Math.floor(W / 200));
       cloud(W*0.58, H*0.04, csc);
       cloud(W*0.70, H*0.01, csc*0.85);
       cloud(W*0.80, H*0.07, csc*1.1);
-      // Faint secondary layer behind
       ctx.globalAlpha = 0.35;
       cloud(W*0.64, H*0.10, csc*0.7);
       ctx.globalAlpha = 1;
 
-      // ── Mountain silhouette ──
-      const pts = [
-        [0,    H],
-        [0,    H*0.64],
-        [W*0.04,H*0.60],
-        [W*0.07,H*0.55],
-        [W*0.10,H*0.58],
-        [W*0.14,H*0.52],
-        [W*0.18,H*0.56],
-        [W*0.22,H*0.47],
-        [W*0.26,H*0.51],
-        [W*0.30,H*0.42],
-        [W*0.33,H*0.46],
-        [W*0.37,H*0.35],
-        [W*0.40,H*0.39],
-        [W*0.43,H*0.24],
-        [W*0.46,H*0.28],
-        [W*0.48,H*0.08], // peak
-        [W*0.50,H*0.12],
-        [W*0.53,H*0.19],
-        [W*0.57,H*0.25],
-        [W*0.61,H*0.30],
-        [W*0.65,H*0.35],
-        [W*0.68,H*0.30], // right shoulder ledge
-        [W*0.71,H*0.38],
-        [W*0.75,H*0.43],
-        [W*0.79,H*0.50],
-        [W*0.83,H*0.46],
-        [W*0.87,H*0.54],
-        [W*0.91,H*0.60],
-        [W*0.96,H*0.64],
-        [W,    H*0.66],
-        [W,    H],
-      ];
+      // Mountain silhouette
       ctx.beginPath();
-      ctx.moveTo(pts[0][0], pts[0][1]);
-      for (const [px,py] of pts.slice(1)) ctx.lineTo(px, py);
+      ctx.moveTo(MTN[0][0]*W, MTN[0][1]*H);
+      for (const [px,py] of MTN.slice(1)) ctx.lineTo(px*W, py*H);
       ctx.closePath();
-      // Very dark fill — almost black with faint blue tinge
-      const mgrad = ctx.createLinearGradient(0, H*0.08, 0, H);
-      mgrad.addColorStop(0,  '#030508');
-      mgrad.addColorStop(0.5,'#020406');
-      mgrad.addColorStop(1,  '#010204');
+      const mgrad = ctx.createLinearGradient(0, H*0.07, 0, H);
+      mgrad.addColorStop(0,   '#030508');
+      mgrad.addColorStop(0.4, '#020406');
+      mgrad.addColorStop(1,   '#010204');
       ctx.fillStyle = mgrad;
       ctx.fill();
 
-      // ── Winding path ──
-      ctx.save();
-      ctx.strokeStyle = 'rgba(50,72,110,0.55)';
-      ctx.lineWidth = Math.max(1, Math.floor(W / 600));
-      ctx.setLineDash([3,5]);
+      // Subtle mountain edge rim — makes ridgeline readable
       ctx.beginPath();
-      const pathPts = [
-        [W*0.18,H*0.70],[W*0.21,H*0.65],[W*0.24,H*0.60],
-        [W*0.22,H*0.55],[W*0.26,H*0.50],[W*0.29,H*0.45],
-        [W*0.27,H*0.40],[W*0.31,H*0.35],[W*0.34,H*0.30],
-        [W*0.37,H*0.25],[W*0.40,H*0.20],[W*0.43,H*0.15],
-        [W*0.46,H*0.10],
-      ];
-      ctx.moveTo(pathPts[0][0], pathPts[0][1]);
-      for (const [px,py] of pathPts.slice(1)) ctx.lineTo(px, py);
+      ctx.moveTo(MTN[1][0]*W, MTN[1][1]*H);
+      for (const [px,py] of MTN.slice(2, MTN.length-2)) ctx.lineTo(px*W, py*H);
+      ctx.strokeStyle = 'rgba(30,50,80,0.45)';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      // Winding path — solid, warm rocky colour
+      ctx.save();
+      ctx.strokeStyle = 'rgba(90,78,52,0.72)';
+      ctx.lineWidth = Math.max(1.5, W / 500);
+      ctx.lineJoin = 'round';
+      ctx.lineCap  = 'round';
+      ctx.beginPath();
+      ctx.moveTo(PATH[0][0]*W, PATH[0][1]*H);
+      for (const [px,py] of PATH.slice(1)) ctx.lineTo(px*W, py*H);
+      ctx.stroke();
+      // Second pass slightly brighter to give depth
+      ctx.strokeStyle = 'rgba(110,95,62,0.35)';
+      ctx.lineWidth = Math.max(1, W / 700);
+      ctx.beginPath();
+      ctx.moveTo(PATH[0][0]*W, PATH[0][1]*H);
+      for (const [px,py] of PATH.slice(1)) ctx.lineTo(px*W, py*H);
       ctx.stroke();
       ctx.restore();
 
-      // ── Town & path lights ──
+      // Town & torch lights
       for (const l of lights) {
         const flk = Math.sin(t * 0.001 * l.spd + l.off);
         if (l.kind === 'village') {
-          const a = Math.max(0.25, Math.min(1, 0.7 + flk * 0.3));
-          // Glow halo
-          ctx.fillStyle = `rgba(255,110,10,${a*0.18})`;
-          ctx.fillRect(l.x-2, l.y-2, l.sz+4, l.sz+4);
-          // Core
-          ctx.fillStyle = `rgba(255,${140+Math.floor(flk*40)},20,${a})`;
+          const a = Math.max(0.2, Math.min(1, 0.68 + flk * 0.32));
+          // Soft glow halo
+          ctx.fillStyle = `rgba(255,100,8,${a*0.2})`;
+          ctx.fillRect(l.x-3, l.y-3, l.sz+6, l.sz+6);
+          // Core pixel
+          ctx.fillStyle = `rgba(255,${130+Math.floor(flk*50)},15,${a})`;
           ctx.fillRect(Math.floor(l.x), Math.floor(l.y), l.sz, l.sz);
         } else {
-          const a = Math.max(0.15, Math.min(0.85, 0.5 + flk * 0.45));
-          ctx.fillStyle = `rgba(255,130,20,${a})`;
+          const a = Math.max(0.1, Math.min(0.9, 0.48 + flk * 0.48));
+          ctx.fillStyle = `rgba(255,125,18,${a})`;
           ctx.fillRect(Math.floor(l.x), Math.floor(l.y), l.sz, l.sz);
         }
       }
 
-      // ── Castle beacon at peak ──
-      const bflk = 0.65 + Math.sin(t * 0.0009) * 0.35;
-      ctx.fillStyle = `rgba(220,50,15,${bflk * 0.5})`;
-      ctx.fillRect(Math.floor(W*0.476), Math.floor(H*0.055), 6, 6);
-      ctx.fillStyle = `rgba(255,90,30,${bflk})`;
-      ctx.fillRect(Math.floor(W*0.479), Math.floor(H*0.060), 3, 3);
+      // Castle beacon at peak
+      const bflk = 0.6 + Math.sin(t * 0.0009) * 0.4;
+      ctx.fillStyle = `rgba(210,45,12,${bflk * 0.45})`;
+      ctx.fillRect(Math.floor(W*0.476), Math.floor(H*0.052), 7, 7);
+      ctx.fillStyle = `rgba(255,85,25,${bflk})`;
+      ctx.fillRect(Math.floor(W*0.479), Math.floor(H*0.057), 3, 3);
 
       requestAnimationFrame(draw);
     }
 
-    window.addEventListener('resize', () => { resize(); });
+    window.addEventListener('resize', resize);
     resize();
     requestAnimationFrame(draw);
   })();
