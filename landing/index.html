@@ -971,11 +971,14 @@
   (function () {
     const canvas = document.getElementById('stars');
     const ctx    = canvas.getContext('2d');
-    let stars = [], lights = [];
+    let stars = [], lights = [], PATH = [];
 
-    // Mountain silhouette points (normalised 0–1)
+    const SEA = 0.73; // sea level as fraction of canvas height
+
+    // Mountain silhouette — closed polygon (normalised 0–1).
+    // Trace: bottom-left → skyline left → peak → skyline right → bottom-right.
     const MTN = [
-      [0,    1  ],
+      [0,    1   ],
       [0,    0.64],
       [0.04, 0.60],
       [0.07, 0.54],
@@ -996,7 +999,7 @@
       [0.58, 0.24],
       [0.62, 0.29],
       [0.66, 0.34],
-      [0.69, 0.29], // right shoulder ledge
+      [0.69, 0.29],
       [0.72, 0.37],
       [0.76, 0.43],
       [0.80, 0.49],
@@ -1008,19 +1011,44 @@
       [1,    1   ],
     ];
 
-    // The winding path — points chosen to sit ON the mountain face
-    const PATH = [
-      [0.14, 0.88], [0.16, 0.83], [0.13, 0.78],
-      [0.17, 0.73], [0.20, 0.68], [0.18, 0.63],
-      [0.22, 0.57], [0.25, 0.52], [0.23, 0.47],
-      [0.27, 0.42], [0.30, 0.37], [0.28, 0.32],
-      [0.32, 0.27], [0.36, 0.22], [0.39, 0.17],
-      [0.43, 0.13], [0.46, 0.09],
-    ];
+    // Skyline-only segment (excludes the two bottom-corner anchors)
+    const SKYLINE = MTN.slice(1, MTN.length - 1);
+
+    // Return the skyline y-fraction (top edge of mountain) at a given x-fraction.
+    // Points INSIDE the mountain satisfy: pointY > getMtnEdge(xFrac).
+    function getMtnEdge(xf) {
+      for (let i = 0; i < SKYLINE.length - 1; i++) {
+        const [x0, y0] = SKYLINE[i];
+        const [x1, y1] = SKYLINE[i + 1];
+        if (xf >= x0 && xf <= x1) {
+          const t = (xf - x0) / (x1 - x0);
+          return y0 + t * (y1 - y0);
+        }
+      }
+      return xf < SKYLINE[0][0] ? SKYLINE[0][1] : SKYLINE[SKYLINE.length - 1][1];
+    }
+
+    // Build the switchback path from village (sea level) to the peak.
+    // x values zigzag left/right; y values are clamped to be inside the mountain.
+    function buildPath() {
+      PATH = [];
+      const xs = [0.10, 0.13, 0.17, 0.14, 0.20, 0.23, 0.19, 0.25, 0.29, 0.26,
+                  0.31, 0.34, 0.30, 0.37, 0.40, 0.36, 0.43, 0.46, 0.48];
+      const ys = [0.70, 0.67, 0.64, 0.61, 0.58, 0.55, 0.52, 0.49, 0.46, 0.44,
+                  0.42, 0.39, 0.37, 0.34, 0.31, 0.28, 0.25, 0.20, 0.13];
+      for (let i = 0; i < xs.length; i++) {
+        const x   = xs[i];
+        const edge = getMtnEdge(x);
+        // Must be inside mountain (y > edge) and above sea (y < SEA)
+        const y   = Math.min(SEA - 0.01, Math.max(edge + 0.04, ys[i]));
+        PATH.push([x, y]);
+      }
+    }
 
     function resize() {
       canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
+      buildPath();
       buildStars();
       buildLights();
     }
@@ -1031,7 +1059,7 @@
       for (let i = 0; i < n; i++) {
         stars.push({
           x:   Math.random() * canvas.width,
-          y:   Math.random() * canvas.height * 0.55,
+          y:   Math.random() * canvas.height * 0.58,
           sz:  Math.random() < 0.88 ? 1 : 2,
           base:0.25 + Math.random() * 0.65,
           spd: 0.3  + Math.random() * 1.1,
@@ -1044,11 +1072,17 @@
       lights = [];
       const W = canvas.width, H = canvas.height;
 
-      // Village cluster — at the true base of the mountain (low y ≈ 0.80–0.91)
-      for (let i = 0; i < 34; i++) {
+      // Village cluster — just above sea level on the left slope
+      for (let i = 0; i < 28; i++) {
+        const lx   = 0.05 + Math.random() * 0.15;
+        const edge = getMtnEdge(lx);
+        // Scatter from just above sea level down to 10% above it
+        const rawY = SEA - 0.01 - Math.random() * 0.09;
+        // Clamp: inside mountain AND above sea level
+        const ly   = Math.min(SEA - 0.005, Math.max(edge + 0.03, rawY));
         lights.push({
-          x:    W * (0.07 + Math.random() * 0.14),
-          y:    H * (0.80 + Math.random() * 0.11),
+          x:    W * lx,
+          y:    H * ly,
           spd:  0.8 + Math.random() * 2.5,
           off:  Math.random() * Math.PI * 2,
           sz:   1 + Math.floor(Math.random() * 2),
@@ -1056,7 +1090,7 @@
         });
       }
 
-      // Torches along the path (every other point)
+      // Torches — one at every other path point
       for (let i = 0; i < PATH.length; i += 2) {
         const [px, py] = PATH[i];
         lights.push({
@@ -1089,7 +1123,7 @@
       const W = canvas.width, H = canvas.height;
       ctx.clearRect(0, 0, W, H);
 
-      // Sky
+      // Sky gradient (full canvas — sea rect painted on top later)
       const sky = ctx.createLinearGradient(0, 0, 0, H);
       sky.addColorStop(0,    '#010610');
       sky.addColorStop(0.45, '#030e26');
@@ -1098,7 +1132,7 @@
       ctx.fillStyle = sky;
       ctx.fillRect(0, 0, W, H);
 
-      // Stars (sky only)
+      // Stars (confined to upper sky)
       for (const s of stars) {
         const a = Math.max(0.06, Math.min(1,
           s.base + Math.sin(t * 0.001 * s.spd + s.off) * 0.28));
@@ -1127,43 +1161,64 @@
       ctx.fillStyle = mgrad;
       ctx.fill();
 
-      // Subtle mountain edge rim — makes ridgeline readable
+      // Subtle skyline rim — keeps ridgeline readable against the sky
       ctx.beginPath();
-      ctx.moveTo(MTN[1][0]*W, MTN[1][1]*H);
-      for (const [px,py] of MTN.slice(2, MTN.length-2)) ctx.lineTo(px*W, py*H);
+      ctx.moveTo(SKYLINE[0][0]*W, SKYLINE[0][1]*H);
+      for (const [px,py] of SKYLINE.slice(1)) ctx.lineTo(px*W, py*H);
       ctx.strokeStyle = 'rgba(30,50,80,0.45)';
-      ctx.lineWidth = 1.5;
+      ctx.lineWidth   = 1.5;
+      ctx.setLineDash([]);
       ctx.stroke();
 
-      // Winding path — solid, warm rocky colour
-      ctx.save();
-      ctx.strokeStyle = 'rgba(90,78,52,0.72)';
-      ctx.lineWidth = Math.max(1.5, W / 500);
-      ctx.lineJoin = 'round';
-      ctx.lineCap  = 'round';
-      ctx.beginPath();
-      ctx.moveTo(PATH[0][0]*W, PATH[0][1]*H);
-      for (const [px,py] of PATH.slice(1)) ctx.lineTo(px*W, py*H);
-      ctx.stroke();
-      // Second pass slightly brighter to give depth
-      ctx.strokeStyle = 'rgba(110,95,62,0.35)';
-      ctx.lineWidth = Math.max(1, W / 700);
-      ctx.beginPath();
-      ctx.moveTo(PATH[0][0]*W, PATH[0][1]*H);
-      for (const [px,py] of PATH.slice(1)) ctx.lineTo(px*W, py*H);
-      ctx.stroke();
-      ctx.restore();
+      // ── SEA ── drawn OVER the mountain base → island-rising-from-sea effect
+      const seaY = Math.floor(H * SEA);
+      const seaG = ctx.createLinearGradient(0, seaY, 0, H);
+      seaG.addColorStop(0,   '#051828');
+      seaG.addColorStop(0.25,'#041220');
+      seaG.addColorStop(1,   '#020a14');
+      ctx.fillStyle = seaG;
+      ctx.fillRect(0, seaY, W, H - seaY);
 
-      // Town & torch lights
+      // Horizon line
+      ctx.strokeStyle = 'rgba(15,55,95,0.7)';
+      ctx.lineWidth   = 1;
+      ctx.setLineDash([]);
+      ctx.beginPath();
+      ctx.moveTo(0, seaY);
+      ctx.lineTo(W, seaY);
+      ctx.stroke();
+
+      // Winding switchback path — solid warm brown, clearly visible
+      if (PATH.length > 1) {
+        ctx.save();
+        ctx.setLineDash([]);
+        ctx.lineJoin = 'round';
+        ctx.lineCap  = 'round';
+        // Dark base pass
+        ctx.strokeStyle = 'rgba(80,65,38,0.9)';
+        ctx.lineWidth   = Math.max(2, W / 420);
+        ctx.beginPath();
+        ctx.moveTo(PATH[0][0]*W, PATH[0][1]*H);
+        for (const [px,py] of PATH.slice(1)) ctx.lineTo(px*W, py*H);
+        ctx.stroke();
+        // Warm highlight pass
+        ctx.strokeStyle = 'rgba(140,118,72,0.7)';
+        ctx.lineWidth   = Math.max(1, W / 700);
+        ctx.beginPath();
+        ctx.moveTo(PATH[0][0]*W, PATH[0][1]*H);
+        for (const [px,py] of PATH.slice(1)) ctx.lineTo(px*W, py*H);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Village & torch lights
       for (const l of lights) {
         const flk = Math.sin(t * 0.001 * l.spd + l.off);
         if (l.kind === 'village') {
           const a = Math.max(0.2, Math.min(1, 0.68 + flk * 0.32));
-          // Soft glow halo
-          ctx.fillStyle = `rgba(255,100,8,${a*0.2})`;
-          ctx.fillRect(l.x-3, l.y-3, l.sz+6, l.sz+6);
-          // Core pixel
-          ctx.fillStyle = `rgba(255,${130+Math.floor(flk*50)},15,${a})`;
+          ctx.fillStyle = `rgba(255,100,8,${a * 0.22})`;
+          ctx.fillRect(l.x - 3, l.y - 3, l.sz + 6, l.sz + 6);
+          ctx.fillStyle = `rgba(255,${130 + Math.floor(flk * 50)},15,${a})`;
           ctx.fillRect(Math.floor(l.x), Math.floor(l.y), l.sz, l.sz);
         } else {
           const a = Math.max(0.1, Math.min(0.9, 0.48 + flk * 0.48));
