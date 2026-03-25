@@ -522,6 +522,63 @@
       color: rgba(100,96,64,0.4);
     }
 
+    /* ── FIGHT OVERLAY ── */
+    .fight-overlay {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 60;
+      background: #06080e;
+      border-top: 3px solid var(--ui-border);
+      padding: 0 0 0.5rem;
+      transform: translateY(100%);
+      transition: transform 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .fight-overlay.visible { transform: translateY(0); }
+
+    .fight-close-row {
+      display: flex;
+      justify-content: flex-end;
+      padding: 0.5rem 1rem 0;
+    }
+    .fight-close-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.42rem;
+      color: var(--red);
+      background: none;
+      border: 1px solid var(--red);
+      padding: 0.4rem 0.8rem;
+      cursor: pointer;
+      letter-spacing: 0.08em;
+      transition: all 0.15s;
+    }
+    .fight-close-btn:hover { background: rgba(208,64,48,0.15); }
+
+    /* ── SCENE TRIGGER ── */
+    .scene {
+      cursor: pointer;
+      position: relative;
+    }
+    .scene:hover .scene-verb {
+      opacity: 1;
+    }
+    .scene-verb {
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: var(--bright);
+      background: var(--ui-bg);
+      border: 1px solid var(--ui-border);
+      padding: 0.4rem 0.8rem;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s;
+      pointer-events: none;
+      z-index: 2;
+    }
+
     /* ── FIGHT SCENE ── */
     .fight-section { position: relative; z-index: 1; padding: 2rem 0 0; }
 
@@ -833,19 +890,10 @@
     </div>
   </section>
 
-  <!-- ═══ SWORDFIGHT ═══ -->
-  <div class="fight-section">
-    <div class="fight-dialog-inner">
-      <div class="fight-speaker" id="fight-speaker">—</div>
-      <div class="fight-text" id="fight-text">...</div>
-    </div>
-    <canvas id="fight-canvas"></canvas>
-  </div>
-
 </div><!-- .content -->
 
-<!-- ═══ ISLAND SCENE ═══ -->
-<div class="scene">
+<!-- ═══ ISLAND SCENE (click to duel) ═══ -->
+<div class="scene" id="scene-trigger">
   <svg viewBox="0 0 1200 140" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
     <!-- water -->
     <rect x="0" y="90" width="1200" height="50" fill="#06122a"/>
@@ -871,6 +919,19 @@
     <line x1="700" y1="102" x2="712" y2="102" stroke="#18304a" stroke-width="1" opacity="0.3"/>
     <line x1="500" y1="95" x2="508" y2="95" stroke="#18304a" stroke-width="1" opacity="0.2"/>
   </svg>
+  <span class="scene-verb">⚔ Talk to: Sword Master on the beach</span>
+</div>
+
+<!-- ═══ FIGHT OVERLAY ═══ -->
+<div class="fight-overlay" id="fight-overlay">
+  <div class="fight-close-row">
+    <button class="fight-close-btn" id="fight-close-btn">Run away! ▸</button>
+  </div>
+  <div class="fight-dialog-inner">
+    <div class="fight-speaker" id="fight-speaker">—</div>
+    <div class="fight-text" id="fight-text">...</div>
+  </div>
+  <canvas id="fight-canvas"></canvas>
 </div>
 
 <!-- ═══ SCUMM BAR ═══ -->
@@ -907,47 +968,225 @@
 </div>
 
 <script>
-  // ── STARFIELD ──────────────────────────────────────────────
-  (function() {
+  // ── MÊLÉE ISLAND BACKGROUND ──────────────────────────────────
+  (function () {
     const canvas = document.getElementById('stars');
-    const ctx = canvas.getContext('2d');
-    let stars = [];
+    const ctx    = canvas.getContext('2d');
+    let stars = [], lights = [];
 
     function resize() {
-      canvas.width = window.innerWidth;
+      canvas.width  = window.innerWidth;
       canvas.height = window.innerHeight;
-      initStars();
+      buildStars();
+      buildLights();
     }
 
-    function initStars() {
+    function buildStars() {
       stars = [];
-      const count = Math.floor((canvas.width * canvas.height) / 2800);
-      for (let i = 0; i < count; i++) {
+      const n = Math.floor((canvas.width * canvas.height) / 3200);
+      for (let i = 0; i < n; i++) {
         stars.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          size: Math.random() < 0.92 ? 1 : 2,
-          base: 0.3 + Math.random() * 0.7,
-          speed: 0.3 + Math.random() * 1.2,
-          offset: Math.random() * Math.PI * 2,
+          x:      Math.random() * canvas.width,
+          y:      Math.random() * canvas.height * 0.58,
+          sz:     Math.random() < 0.88 ? 1 : 2,
+          base:   0.25 + Math.random() * 0.65,
+          spd:    0.3  + Math.random() * 1.1,
+          off:    Math.random() * Math.PI * 2,
         });
       }
     }
 
-    function draw(time) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      for (const s of stars) {
-        const flicker = s.base + Math.sin(time * 0.001 * s.speed + s.offset) * 0.3;
-        const alpha = Math.max(0.08, Math.min(1, flicker));
-        ctx.fillStyle = `rgba(200, 208, 220, ${alpha})`;
-        ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.size, s.size);
+    function buildLights() {
+      lights = [];
+      const W = canvas.width, H = canvas.height;
+      // Village torches clustered at lower-left base
+      for (let i = 0; i < 28; i++) {
+        lights.push({
+          x:    W * (0.08 + Math.random() * 0.18),
+          y:    H * (0.64 + Math.random() * 0.12),
+          spd:  0.8 + Math.random() * 2.4,
+          off:  Math.random() * Math.PI * 2,
+          sz:   1 + Math.floor(Math.random() * 2),
+          kind: 'village',
+        });
       }
+      // Path torches winding up
+      const path = [
+        [0.21,0.64],[0.23,0.59],[0.26,0.54],[0.24,0.49],
+        [0.28,0.44],[0.31,0.39],[0.29,0.34],[0.33,0.29],
+        [0.36,0.24],[0.39,0.19],[0.42,0.14],
+      ];
+      for (const [px,py] of path) {
+        lights.push({
+          x: W*px, y: H*py,
+          spd: 1.2 + Math.random() * 2,
+          off: Math.random() * Math.PI * 2,
+          sz: 2, kind: 'torch',
+        });
+      }
+    }
+
+    // Chunky pixel-art cloud block
+    function cloud(x, y, sc) {
+      const blocks = [
+        [0,3,5,3],[3,1,6,5],[8,0,7,6],[14,1,6,5],
+        [18,3,5,3],[5,0,4,2],[11,-1,5,2],
+      ];
+      for (const [bx,by,bw,bh] of blocks) {
+        // Slight depth: inner blocks brighter
+        const bright = (bx > 4 && bx < 16) ? '#7890e8' : '#4a68c8';
+        ctx.fillStyle = bright;
+        ctx.fillRect(Math.floor(x+bx*sc), Math.floor(y+by*sc), bw*sc, bh*sc);
+      }
+      // Bright top highlights
+      ctx.fillStyle = '#a0b4f8';
+      ctx.fillRect(Math.floor(x+8*sc),  Math.floor(y), 3*sc, sc);
+      ctx.fillRect(Math.floor(x+3*sc),  Math.floor(y+sc), 2*sc, sc);
+    }
+
+    function draw(t) {
+      const W = canvas.width, H = canvas.height;
+      ctx.clearRect(0, 0, W, H);
+
+      // ── Sky gradient ──
+      const sky = ctx.createLinearGradient(0, 0, 0, H);
+      sky.addColorStop(0,   '#010610');
+      sky.addColorStop(0.45,'#030e26');
+      sky.addColorStop(0.72,'#051430');
+      sky.addColorStop(1,   '#040a1c');
+      ctx.fillStyle = sky;
+      ctx.fillRect(0, 0, W, H);
+
+      // ── Stars ──
+      for (const s of stars) {
+        const a = Math.max(0.06, Math.min(1,
+          s.base + Math.sin(t * 0.001 * s.spd + s.off) * 0.28));
+        ctx.fillStyle = `rgba(200,210,228,${a})`;
+        ctx.fillRect(Math.floor(s.x), Math.floor(s.y), s.sz, s.sz);
+      }
+
+      // ── Pixel clouds (upper-right) ──
+      const csc = Math.max(3, Math.floor(W / 200));
+      cloud(W*0.58, H*0.04, csc);
+      cloud(W*0.70, H*0.01, csc*0.85);
+      cloud(W*0.80, H*0.07, csc*1.1);
+      // Faint secondary layer behind
+      ctx.globalAlpha = 0.35;
+      cloud(W*0.64, H*0.10, csc*0.7);
+      ctx.globalAlpha = 1;
+
+      // ── Mountain silhouette ──
+      const pts = [
+        [0,    H],
+        [0,    H*0.64],
+        [W*0.04,H*0.60],
+        [W*0.07,H*0.55],
+        [W*0.10,H*0.58],
+        [W*0.14,H*0.52],
+        [W*0.18,H*0.56],
+        [W*0.22,H*0.47],
+        [W*0.26,H*0.51],
+        [W*0.30,H*0.42],
+        [W*0.33,H*0.46],
+        [W*0.37,H*0.35],
+        [W*0.40,H*0.39],
+        [W*0.43,H*0.24],
+        [W*0.46,H*0.28],
+        [W*0.48,H*0.08], // peak
+        [W*0.50,H*0.12],
+        [W*0.53,H*0.19],
+        [W*0.57,H*0.25],
+        [W*0.61,H*0.30],
+        [W*0.65,H*0.35],
+        [W*0.68,H*0.30], // right shoulder ledge
+        [W*0.71,H*0.38],
+        [W*0.75,H*0.43],
+        [W*0.79,H*0.50],
+        [W*0.83,H*0.46],
+        [W*0.87,H*0.54],
+        [W*0.91,H*0.60],
+        [W*0.96,H*0.64],
+        [W,    H*0.66],
+        [W,    H],
+      ];
+      ctx.beginPath();
+      ctx.moveTo(pts[0][0], pts[0][1]);
+      for (const [px,py] of pts.slice(1)) ctx.lineTo(px, py);
+      ctx.closePath();
+      // Very dark fill — almost black with faint blue tinge
+      const mgrad = ctx.createLinearGradient(0, H*0.08, 0, H);
+      mgrad.addColorStop(0,  '#030508');
+      mgrad.addColorStop(0.5,'#020406');
+      mgrad.addColorStop(1,  '#010204');
+      ctx.fillStyle = mgrad;
+      ctx.fill();
+
+      // ── Winding path ──
+      ctx.save();
+      ctx.strokeStyle = 'rgba(50,72,110,0.55)';
+      ctx.lineWidth = Math.max(1, Math.floor(W / 600));
+      ctx.setLineDash([3,5]);
+      ctx.beginPath();
+      const pathPts = [
+        [W*0.18,H*0.70],[W*0.21,H*0.65],[W*0.24,H*0.60],
+        [W*0.22,H*0.55],[W*0.26,H*0.50],[W*0.29,H*0.45],
+        [W*0.27,H*0.40],[W*0.31,H*0.35],[W*0.34,H*0.30],
+        [W*0.37,H*0.25],[W*0.40,H*0.20],[W*0.43,H*0.15],
+        [W*0.46,H*0.10],
+      ];
+      ctx.moveTo(pathPts[0][0], pathPts[0][1]);
+      for (const [px,py] of pathPts.slice(1)) ctx.lineTo(px, py);
+      ctx.stroke();
+      ctx.restore();
+
+      // ── Town & path lights ──
+      for (const l of lights) {
+        const flk = Math.sin(t * 0.001 * l.spd + l.off);
+        if (l.kind === 'village') {
+          const a = Math.max(0.25, Math.min(1, 0.7 + flk * 0.3));
+          // Glow halo
+          ctx.fillStyle = `rgba(255,110,10,${a*0.18})`;
+          ctx.fillRect(l.x-2, l.y-2, l.sz+4, l.sz+4);
+          // Core
+          ctx.fillStyle = `rgba(255,${140+Math.floor(flk*40)},20,${a})`;
+          ctx.fillRect(Math.floor(l.x), Math.floor(l.y), l.sz, l.sz);
+        } else {
+          const a = Math.max(0.15, Math.min(0.85, 0.5 + flk * 0.45));
+          ctx.fillStyle = `rgba(255,130,20,${a})`;
+          ctx.fillRect(Math.floor(l.x), Math.floor(l.y), l.sz, l.sz);
+        }
+      }
+
+      // ── Castle beacon at peak ──
+      const bflk = 0.65 + Math.sin(t * 0.0009) * 0.35;
+      ctx.fillStyle = `rgba(220,50,15,${bflk * 0.5})`;
+      ctx.fillRect(Math.floor(W*0.476), Math.floor(H*0.055), 6, 6);
+      ctx.fillStyle = `rgba(255,90,30,${bflk})`;
+      ctx.fillRect(Math.floor(W*0.479), Math.floor(H*0.060), 3, 3);
+
       requestAnimationFrame(draw);
     }
 
-    window.addEventListener('resize', resize);
+    window.addEventListener('resize', () => { resize(); });
     resize();
     requestAnimationFrame(draw);
+  })();
+
+  // ── FIGHT OVERLAY TOGGLE ────────────────────────────────────
+  (function () {
+    const overlay  = document.getElementById('fight-overlay');
+    const trigger  = document.getElementById('scene-trigger');
+    const closeBtn = document.getElementById('fight-close-btn');
+
+    trigger.addEventListener('click', () => {
+      overlay.classList.toggle('visible');
+    });
+    closeBtn.addEventListener('click', () => {
+      overlay.classList.remove('visible');
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') overlay.classList.remove('visible');
+    });
   })();
 
   // ── KONAMI CODE ──────────────────────────────────────────────
