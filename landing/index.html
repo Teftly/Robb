@@ -1056,7 +1056,7 @@
     // ── Guybrush (facing right, pony-tail blond, blue vest) ──
     function drawGuybrush(cx, cy, s, pose) {
       ctx.save();
-      ctx.translate(cx, cy);
+      ctx.translate(cx, cy - 24 * s);  // cy=feet, shift up by character height
       if (pose === 1) ctx.translate( 2 * s, 0);  // lunge forward
       if (pose === 2) ctx.translate(-3 * s, 0);  // stagger back
 
@@ -1107,7 +1107,7 @@
     // ── Sword Master (faces left, red hat, dark coat) ──
     function drawSwordMaster(cx, cy, s, pose) {
       ctx.save();
-      ctx.translate(cx, cy);
+      ctx.translate(cx, cy - 24 * s);  // cy=feet, shift up by character height
       ctx.scale(-1, 1); // mirror to face left
       if (pose === 1) ctx.translate( 2 * s, 0);  // lunge (mirror = moves left on screen)
       if (pose === 2) ctx.translate(-3 * s, 0);
