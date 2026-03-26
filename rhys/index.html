@@ -70,6 +70,42 @@
       background-size: 200px 200px;
     }
 
+    /* ── GROUND FOG ──────────────────────────────────── */
+    .ground-fog {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      height: 260px;
+      z-index: 3;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .fog-layer {
+      position: absolute;
+      bottom: 0;
+      width: 300%;
+      height: 100%;
+      background: repeating-linear-gradient(
+        90deg,
+        transparent 0%,
+        rgba(210,210,185,0.07) 8%,
+        rgba(210,210,185,0.13) 15%,
+        rgba(210,210,185,0.06) 22%,
+        transparent 30%
+      );
+    }
+    .fog-layer:nth-child(1) { animation: fogDrift 22s linear infinite; }
+    .fog-layer:nth-child(2) { animation: fogDrift 34s linear infinite reverse; opacity: 0.6; bottom: -20px; }
+    .fog-layer:nth-child(3) { animation: fogDrift 18s linear infinite; opacity: 0.35; bottom: 30px; }
+    @keyframes fogDrift {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-33.33%); }
+    }
+    .fog-fade {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom, transparent 0%, rgba(14,12,8,0.55) 100%);
+    }
+
     /* ── CAUTION STRIPE ─────────────────────────────── */
     .caution-stripe {
       background: repeating-linear-gradient(
@@ -452,6 +488,12 @@
 <canvas id="bg"></canvas>
 <div class="vignette"></div>
 <div class="film-grain"></div>
+<div class="ground-fog">
+  <div class="fog-layer"></div>
+  <div class="fog-layer"></div>
+  <div class="fog-layer"></div>
+  <div class="fog-fade"></div>
+</div>
 
 <!-- HUD BAR -->
 <div class="hud-bar">
@@ -677,131 +719,256 @@
 (function () {
   const canvas = document.getElementById('bg');
   const ctx    = canvas.getContext('2d');
-  let noiseOff = 0;
 
-  // Flickering light state
-  let flkBase  = 0.72;
-  let flkTarget = 0.72;
-  let flkTimer  = 0;
+  // Flickering bulb state
+  let flkBase = 0.7, flkTarget = 0.7, flkTimer = 0;
 
-  // Chalk scrawl marks (pre-computed)
-  let marks = [];
+  // Static scene elements (rebuilt on resize)
+  let bricks = [], cracks = [], chalk = [];
+
+  // Seeded-ish random so marks don't jump on every frame
+  let rng = (n) => { let x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); };
 
   function resize() {
     canvas.width  = window.innerWidth;
     canvas.height = window.innerHeight;
-    buildMarks();
+    buildScene();
   }
 
-  // Random chalk/stencil decorations
-  function buildMarks() {
-    marks = [];
+  function buildScene() {
+    bricks = []; cracks = []; chalk = [];
     const W = canvas.width, H = canvas.height;
-    // Brick mortar lines (horizontal)
-    const brickH = 28;
-    for (let y = 0; y < H; y += brickH) {
-      marks.push({ type: 'hline', y, alpha: 0.06 + Math.random() * 0.06 });
-    }
-    // Brick mortar lines (vertical, offset every other row)
-    const brickW = 62;
-    for (let row = 0; row * brickH < H; row++) {
-      const offset = (row % 2) * (brickW / 2);
-      for (let x = offset; x < W + brickW; x += brickW) {
-        const y0 = row * brickH;
-        marks.push({ type: 'vline', x, y0, y1: y0 + brickH, alpha: 0.05 + Math.random() * 0.05 });
+    const BH = 30, BW = 64;
+
+    // Individual brick rectangles with slight colour variation
+    for (let row = 0; row * BH < H + BH; row++) {
+      const offset = (row % 2) * (BW / 2);
+      for (let col = -1; col * BW < W + BW; col++) {
+        const x = col * BW + offset;
+        const y = row * BH;
+        const seed = row * 200 + col;
+        const lightness = 12 + rng(seed) * 8;   // subtle variation
+        bricks.push({ x, y, w: BW - 2, h: BH - 2, l: lightness });
       }
     }
-    // Chalk text fragments
-    const texts = ['NACHT', '115', 'ZOMBIES', 'ROUND 1', 'HELP', 'DER RIESE', '⚠', 'K/D', 'PACK-A-PUNCH'];
-    for (let i = 0; i < 6; i++) {
-      marks.push({
+
+    // Cracks — jagged multi-segment lines
+    for (let i = 0; i < 8; i++) {
+      const seg = [];
+      let cx = W * rng(i * 3)
+      let cy = H * (0.1 + rng(i * 3 + 1) * 0.8);
+      seg.push([cx, cy]);
+      const segs = 3 + Math.floor(rng(i * 3 + 2) * 5);
+      for (let s = 0; s < segs; s++) {
+        cx += (rng(i * 10 + s) - 0.4) * 40;
+        cy += (rng(i * 10 + s + 1) - 0.2) * 30;
+        seg.push([cx, cy]);
+      }
+      cracks.push({ seg, alpha: 0.08 + rng(i) * 0.1 });
+    }
+
+    // Chalk drawings
+    const texts = ['115', 'HELP', 'ROUND 1', 'DER RIESE', 'NACHT', '⚠ DANGER'];
+    for (let i = 0; i < 5; i++) {
+      chalk.push({
         type: 'text',
-        str:   texts[Math.floor(Math.random() * texts.length)],
-        x:     W * (0.05 + Math.random() * 0.88),
-        y:     H * (0.08 + Math.random() * 0.84),
-        rot:   (Math.random() - 0.5) * 0.3,
-        alpha: 0.03 + Math.random() * 0.05,
-        sz:    14 + Math.floor(Math.random() * 22),
+        str:  texts[i % texts.length],
+        x: W * (0.05 + rng(i * 7) * 0.88),
+        y: H * (0.1  + rng(i * 7 + 1) * 0.78),
+        rot: (rng(i * 7 + 2) - 0.5) * 0.35,
+        alpha: 0.04 + rng(i * 7 + 3) * 0.06,
+        sz: 14 + Math.floor(rng(i * 7 + 4) * 24),
       });
     }
+
+    // Chalk zombie silhouettes
+    for (let i = 0; i < 4; i++) {
+      chalk.push({
+        type: 'zombie',
+        x: W * (0.08 + rng(i * 13) * 0.84),
+        y: H * (0.25 + rng(i * 13 + 1) * 0.55),
+        scale: 18 + rng(i * 13 + 2) * 22,
+        alpha: 0.04 + rng(i * 13 + 3) * 0.06,
+      });
+    }
+
+    // Tally marks (scratched into wall)
+    for (let i = 0; i < 3; i++) {
+      chalk.push({
+        type: 'tally',
+        x: W * (0.06 + rng(i * 17) * 0.85),
+        y: H * (0.15 + rng(i * 17 + 1) * 0.65),
+        count: 5 + Math.floor(rng(i * 17 + 2) * 20),
+        alpha: 0.06 + rng(i * 17 + 3) * 0.07,
+      });
+    }
+  }
+
+  function drawZombie(x, y, sz, alpha) {
+    ctx.save();
+    ctx.strokeStyle = `rgba(200,195,155,${alpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    // Head
+    ctx.beginPath();
+    ctx.arc(x, y - sz, sz * 0.28, 0, Math.PI * 2);
+    ctx.stroke();
+    // Body
+    ctx.beginPath();
+    ctx.moveTo(x, y - sz * 0.7);
+    ctx.lineTo(x, y);
+    ctx.stroke();
+    // Arms outstretched (zombie reach)
+    ctx.beginPath();
+    ctx.moveTo(x - sz * 0.7, y - sz * 0.4);
+    ctx.lineTo(x + sz * 0.7, y - sz * 0.55);
+    ctx.stroke();
+    // Legs
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+    ctx.lineTo(x - sz * 0.3, y + sz * 0.7);
+    ctx.moveTo(x, y);
+    ctx.lineTo(x + sz * 0.35, y + sz * 0.7);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function drawTally(x, y, count, alpha) {
+    ctx.save();
+    ctx.strokeStyle = `rgba(200,195,155,${alpha})`;
+    ctx.lineWidth = 1.5;
+    ctx.lineCap = 'round';
+    for (let i = 0; i < count; i++) {
+      const grp = Math.floor(i / 5);
+      const pos = i % 5;
+      const gx = x + grp * 32;
+      if (pos < 4) {
+        ctx.beginPath();
+        ctx.moveTo(gx + pos * 6, y);
+        ctx.lineTo(gx + pos * 6, y + 22);
+        ctx.stroke();
+      } else {
+        // diagonal strike-through
+        ctx.beginPath();
+        ctx.moveTo(gx - 3, y + 22);
+        ctx.lineTo(gx + 22, y);
+        ctx.stroke();
+      }
+    }
+    ctx.restore();
   }
 
   function draw(t) {
     const W = canvas.width, H = canvas.height;
     ctx.clearRect(0, 0, W, H);
 
-    // ── Base wall colour — dark olive/concrete ──────────────────
-    const wall = ctx.createLinearGradient(0, 0, 0, H);
-    wall.addColorStop(0,   '#0a0a06');
-    wall.addColorStop(0.5, '#0d0d08');
-    wall.addColorStop(1,   '#0b0b07');
-    ctx.fillStyle = wall;
+    // ── Base dark concrete ──────────────────────────────────────
+    ctx.fillStyle = '#090906';
     ctx.fillRect(0, 0, W, H);
 
-    // ── Brick/mortar lines ──────────────────────────────────────
-    for (const m of marks) {
-      if (m.type === 'hline') {
-        ctx.strokeStyle = `rgba(40,38,24,${m.alpha})`;
-        ctx.lineWidth   = 1;
-        ctx.beginPath();
-        ctx.moveTo(0, m.y);
-        ctx.lineTo(W, m.y);
-        ctx.stroke();
-      } else if (m.type === 'vline') {
-        ctx.strokeStyle = `rgba(40,38,24,${m.alpha})`;
-        ctx.lineWidth   = 1;
-        ctx.beginPath();
-        ctx.moveTo(m.x, m.y0);
-        ctx.lineTo(m.x, m.y1);
-        ctx.stroke();
+    // ── Individual bricks ───────────────────────────────────────
+    for (const b of bricks) {
+      ctx.fillStyle = `rgb(${b.l},${b.l - 2},${Math.floor(b.l * 0.55)})`;
+      ctx.fillRect(b.x, b.y, b.w, b.h);
+    }
+
+    // Mortar / grout shadow — thin dark lines at full rows
+    ctx.strokeStyle = 'rgba(4,4,2,0.9)';
+    ctx.lineWidth = 2;
+    const BH = 30, BW = 64;
+    for (let row = 0; row * BH < H + BH; row++) {
+      const y = row * BH;
+      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+      const offset = (row % 2) * (BW / 2);
+      for (let x = offset - BW; x < W + BW; x += BW) {
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + BH); ctx.stroke();
       }
     }
 
-    // ── Chalk scrawl text ───────────────────────────────────────
-    ctx.font = `bold 14px 'Special Elite', serif`;
-    for (const m of marks) {
-      if (m.type !== 'text') continue;
-      ctx.save();
-      ctx.translate(m.x, m.y);
-      ctx.rotate(m.rot);
-      ctx.fillStyle   = `rgba(210,200,160,${m.alpha})`;
-      ctx.font        = `bold ${m.sz}px 'Black Ops One', sans-serif`;
-      ctx.fillText(m.str, 0, 0);
-      ctx.restore();
+    // ── Cracks ──────────────────────────────────────────────────
+    for (const c of cracks) {
+      ctx.strokeStyle = `rgba(3,3,2,${c.alpha})`;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(c.seg[0][0], c.seg[0][1]);
+      for (const [px, py] of c.seg.slice(1)) ctx.lineTo(px, py);
+      ctx.stroke();
     }
 
-    // ── Flickering overhead light ───────────────────────────────
+    // ── Chalk art ───────────────────────────────────────────────
+    for (const m of chalk) {
+      if (m.type === 'text') {
+        ctx.save();
+        ctx.translate(m.x, m.y);
+        ctx.rotate(m.rot);
+        ctx.fillStyle = `rgba(215,205,165,${m.alpha})`;
+        ctx.font = `bold ${m.sz}px 'Black Ops One', sans-serif`;
+        ctx.fillText(m.str, 0, 0);
+        ctx.restore();
+      } else if (m.type === 'zombie') {
+        drawZombie(m.x, m.y, m.scale, m.alpha);
+      } else if (m.type === 'tally') {
+        drawTally(m.x, m.y, m.count, m.alpha);
+      }
+    }
+
+    // ── Flicker logic ───────────────────────────────────────────
     flkTimer -= 16;
     if (flkTimer <= 0) {
-      flkTarget = Math.random() < 0.08
-        ? 0.15 + Math.random() * 0.2   // rare blackout flicker
-        : 0.5  + Math.random() * 0.45;
-      flkTimer  = 60 + Math.random() * 280;
+      if (Math.random() < 0.06) {
+        flkTarget = 0.05 + Math.random() * 0.15; // blackout
+        flkTimer  = 60  + Math.random() * 120;
+      } else {
+        flkTarget = 0.5 + Math.random() * 0.45;
+        flkTimer  = 80  + Math.random() * 350;
+      }
     }
-    flkBase += (flkTarget - flkBase) * 0.12;
-    const flk = flkBase + Math.sin(t * 0.007) * 0.04;
+    flkBase += (flkTarget - flkBase) * 0.1;
+    const flk = Math.max(0, flkBase + Math.sin(t * 0.009) * 0.03);
 
-    // Overhead bulb glow — originates from top-centre
-    const lx = W * 0.5, ly = H * -0.02;
-    const radius = Math.min(W, H) * 1.1;
-    const lightG = ctx.createRadialGradient(lx, ly, 0, lx, ly, radius);
-    lightG.addColorStop(0,    `rgba(180,155,90,${flk * 0.55})`);
-    lightG.addColorStop(0.18, `rgba(120,95,45,${flk * 0.28})`);
-    lightG.addColorStop(0.45, `rgba(60,45,18,${flk * 0.12})`);
-    lightG.addColorStop(1,    'rgba(0,0,0,0)');
-    ctx.fillStyle = lightG;
+    // ── Hanging bulb + cone ─────────────────────────────────────
+    const bx = Math.floor(W * 0.5);
+    // Cord
+    ctx.strokeStyle = `rgba(80,70,40,${flk * 0.8 + 0.1})`;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(bx, 0); ctx.lineTo(bx, 28); ctx.stroke();
+    // Socket cap
+    ctx.fillStyle = `rgba(50,45,28,${flk * 0.7 + 0.2})`;
+    ctx.fillRect(bx - 5, 28, 10, 6);
+    // Bulb glow
+    const glowR = 8 + flk * 4;
+    const bulbG = ctx.createRadialGradient(bx, 38, 0, bx, 38, glowR);
+    bulbG.addColorStop(0,   `rgba(255,230,140,${flk})`);
+    bulbG.addColorStop(0.5, `rgba(220,180,80,${flk * 0.6})`);
+    bulbG.addColorStop(1,   'rgba(0,0,0,0)');
+    ctx.fillStyle = bulbG;
+    ctx.fillRect(bx - glowR, 38 - glowR, glowR * 2, glowR * 2);
+    // Glass bulb shape
+    ctx.fillStyle = `rgba(255,240,180,${flk * 0.9 + 0.05})`;
+    ctx.beginPath(); ctx.ellipse(bx, 40, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
+
+    // ── Light cone radiating down from bulb ─────────────────────
+    const coneG = ctx.createRadialGradient(bx, 40, 0, bx, 40, Math.max(W, H) * 0.9);
+    coneG.addColorStop(0,    `rgba(200,165,80,${flk * 0.55})`);
+    coneG.addColorStop(0.12, `rgba(140,108,45,${flk * 0.28})`);
+    coneG.addColorStop(0.35, `rgba(70,52,18,${flk * 0.12})`);
+    coneG.addColorStop(1,    'rgba(0,0,0,0)');
+    ctx.fillStyle = coneG;
     ctx.fillRect(0, 0, W, H);
 
-    // Subtle warm pooling at floor
-    const floorG = ctx.createLinearGradient(0, H * 0.7, 0, H);
+    // ── Dark corners / floor ────────────────────────────────────
+    const cornerG = ctx.createRadialGradient(W/2, H/2, H * 0.2, W/2, H/2, H * 0.9);
+    cornerG.addColorStop(0, 'rgba(0,0,0,0)');
+    cornerG.addColorStop(1, `rgba(0,0,0,${0.55 + (1 - flk) * 0.3})`);
+    ctx.fillStyle = cornerG;
+    ctx.fillRect(0, 0, W, H);
+
+    // Floor darkness
+    const floorG = ctx.createLinearGradient(0, H * 0.65, 0, H);
     floorG.addColorStop(0, 'rgba(0,0,0,0)');
-    floorG.addColorStop(1, `rgba(10,8,4,${0.55 + (1 - flk) * 0.3})`);
+    floorG.addColorStop(1, `rgba(4,3,1,${0.7 + (1 - flk) * 0.25})`);
     ctx.fillStyle = floorG;
-    ctx.fillRect(0, H * 0.7, W, H * 0.3);
-
-    // ── Film-age sepia tint (very subtle, varies with flicker) ──
-    ctx.fillStyle = `rgba(30,22,8,${0.08 + (1 - flk) * 0.12})`;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(0, H * 0.65, W, H * 0.35);
 
     requestAnimationFrame(draw);
   }
