@@ -1,0 +1,816 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TERRY, R. — CLASSIFIED DOSSIER</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Special+Elite&family=Oswald:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void:    #07070400;
+      --bunker:  #0d0d08;
+      --olive:   #1e1e10;
+      --dark-olive: #2a2a14;
+      --paper:   #c8b87a;
+      --chalk:   #ddd8c0;
+      --faded:   #9a9278;
+      --alert:   #d4620a;
+      --muzzle:  #f0a030;
+      --blood:   #7a1212;
+      --danger:  #c41a1a;
+      --rust:    #8b4010;
+      --stencil: #4a5c2a;
+      --caution: #f0c030;
+      --115:     #7b3af0;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bunker);
+      color: var(--chalk);
+      font-family: 'Special Elite', serif;
+      font-size: 16px;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ── FIXED BACKGROUND ───────────────────────────── */
+    #bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ── OVERLAYS ───────────────────────────────────── */
+    .vignette {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: radial-gradient(
+        ellipse at 50% 40%,
+        transparent 30%,
+        rgba(0,0,0,0.55) 70%,
+        rgba(0,0,0,0.88) 100%
+      );
+    }
+
+    .film-grain {
+      position: fixed;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+      background-size: 200px 200px;
+    }
+
+    /* ── CAUTION STRIPE ─────────────────────────────── */
+    .caution-stripe {
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--caution),
+        var(--caution) 10px,
+        #1a1a00 10px,
+        #1a1a00 20px
+      );
+      height: 8px;
+      width: 100%;
+    }
+
+    /* ── TOP HUD BAR ────────────────────────────────── */
+    .hud-bar {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 50;
+      background: rgba(0,0,0,0.82);
+      border-bottom: 2px solid var(--alert);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 24px;
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+    }
+    .hud-bar .hud-left  { color: var(--caution); }
+    .hud-bar .hud-mid   { color: var(--danger);  font-size: 10px; animation: blink 1.8s step-end infinite; }
+    .hud-bar .hud-right { color: var(--faded);   }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50%       { opacity: 0; }
+    }
+
+    /* ── MAIN CONTENT ───────────────────────────────── */
+    .page {
+      position: relative;
+      z-index: 10;
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 80px 24px 48px;
+    }
+
+    /* ── HERO ───────────────────────────────────────── */
+    .hero {
+      margin-bottom: 48px;
+      border: 2px solid var(--alert);
+      padding: 32px;
+      position: relative;
+      background: rgba(0,0,0,0.55);
+    }
+    .hero::before {
+      content: 'CLASSIFIED';
+      position: absolute;
+      top: 22px; right: 22px;
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 22px;
+      color: var(--danger);
+      border: 3px solid var(--danger);
+      padding: 4px 10px;
+      transform: rotate(-8deg);
+      opacity: 0.75;
+      letter-spacing: 0.08em;
+      text-shadow: 0 0 12px rgba(180,20,20,0.5);
+    }
+
+    .case-tag {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 10px;
+      color: var(--faded);
+      letter-spacing: 0.2em;
+      margin-bottom: 10px;
+    }
+
+    .hero h1 {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: clamp(2.4rem, 7vw, 4.2rem);
+      color: var(--paper);
+      letter-spacing: 0.04em;
+      line-height: 1;
+      text-shadow: 3px 3px 0 #000, 0 0 30px rgba(212,98,10,0.35);
+      margin-bottom: 8px;
+    }
+
+    .hero-designation {
+      font-family: 'Oswald', sans-serif;
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: var(--alert);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      margin-bottom: 20px;
+    }
+
+    .hero-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 24px;
+      margin-top: 20px;
+    }
+    .stat-block {
+      text-align: center;
+    }
+    .stat-block .stat-num {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 2rem;
+      color: var(--muzzle);
+      display: block;
+      text-shadow: 0 0 16px rgba(240,160,48,0.5);
+    }
+    .stat-block .stat-label {
+      font-size: 9px;
+      color: var(--faded);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .hero-location {
+      margin-top: 14px;
+      font-size: 0.85rem;
+      color: var(--faded);
+      letter-spacing: 0.1em;
+    }
+    .hero-location::before { content: '▸ LOCATION: '; color: var(--alert); }
+
+    /* ── SECTION HEADERS ────────────────────────────── */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 20px;
+      margin-top: 44px;
+    }
+    .section-head::before {
+      content: '';
+      flex: 0 0 4px;
+      height: 28px;
+      background: var(--alert);
+      display: block;
+    }
+    .section-head h2 {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 1.1rem;
+      color: var(--paper);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+    }
+    .section-head::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(to right, var(--alert), transparent);
+      opacity: 0.4;
+    }
+
+    /* ── INTEL BRIEFING ─────────────────────────────── */
+    .briefing {
+      background: rgba(0,0,0,0.5);
+      border-left: 3px solid var(--alert);
+      border-bottom: 1px solid rgba(212,98,10,0.3);
+      padding: 20px 24px;
+      font-size: 0.95rem;
+      color: var(--chalk);
+      line-height: 1.75;
+      position: relative;
+    }
+    .briefing::before {
+      content: 'INTEL BRIEFING // EYES ONLY';
+      display: block;
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 9px;
+      color: var(--alert);
+      letter-spacing: 0.18em;
+      margin-bottom: 10px;
+    }
+    .briefing-stamp {
+      position: absolute;
+      bottom: 12px; right: 16px;
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 18px;
+      color: var(--blood);
+      border: 2px solid var(--blood);
+      padding: 3px 8px;
+      transform: rotate(6deg);
+      opacity: 0.6;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── DEPLOYMENTS / EXPERIENCE ───────────────────── */
+    .deployment {
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(212,98,10,0.25);
+      border-left: 3px solid var(--stencil);
+      padding: 22px 24px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .deployment.current {
+      border-left-color: var(--muzzle);
+    }
+    .deployment-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .deployment-title {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 1rem;
+      color: var(--paper);
+      letter-spacing: 0.06em;
+    }
+    .deployment-org {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.85rem;
+      color: var(--alert);
+      letter-spacing: 0.1em;
+      margin-top: 2px;
+    }
+    .deployment-dates {
+      font-size: 0.78rem;
+      color: var(--faded);
+      font-family: 'Oswald', sans-serif;
+      letter-spacing: 0.1em;
+      text-align: right;
+    }
+    .badge-active {
+      display: inline-block;
+      background: var(--muzzle);
+      color: #000;
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 9px;
+      padding: 2px 7px;
+      letter-spacing: 0.1em;
+      margin-top: 4px;
+    }
+    .deployment ul {
+      list-style: none;
+      margin-top: 10px;
+    }
+    .deployment ul li {
+      font-size: 0.9rem;
+      color: var(--chalk);
+      padding: 3px 0 3px 20px;
+      position: relative;
+      line-height: 1.55;
+    }
+    .deployment ul li::before {
+      content: '▸';
+      position: absolute;
+      left: 0;
+      color: var(--alert);
+    }
+
+    /* ── CAPABILITIES / PERKS GRID ──────────────────── */
+    .perks-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+      gap: 12px;
+    }
+    .perk {
+      background: rgba(0,0,0,0.6);
+      border: 1px solid rgba(212,98,10,0.3);
+      padding: 14px 16px;
+      position: relative;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .perk:hover {
+      border-color: var(--muzzle);
+      background: rgba(30,20,8,0.8);
+    }
+    .perk-icon {
+      font-size: 1.5rem;
+      display: block;
+      margin-bottom: 6px;
+      filter: sepia(1) saturate(0.6);
+    }
+    .perk-name {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 0.72rem;
+      color: var(--paper);
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 4px;
+    }
+    .perk-level {
+      display: flex;
+      gap: 3px;
+      margin-top: 6px;
+    }
+    .perk-pip {
+      width: 14px;
+      height: 4px;
+      background: var(--dark-olive);
+      border: 1px solid rgba(212,98,10,0.4);
+    }
+    .perk-pip.filled { background: var(--alert); border-color: var(--muzzle); }
+
+    /* ── EXFIL / CONTACT ────────────────────────────── */
+    .exfil-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 12px;
+    }
+    .exfil-item {
+      background: rgba(0,0,0,0.55);
+      border: 1px solid rgba(212,98,10,0.3);
+      padding: 16px 20px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      text-decoration: none;
+      display: block;
+    }
+    .exfil-item:hover {
+      background: rgba(212,98,10,0.12);
+      border-color: var(--muzzle);
+    }
+    .exfil-key {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 1.4rem;
+      color: var(--muzzle);
+      display: block;
+      margin-bottom: 4px;
+    }
+    .exfil-label {
+      font-family: 'Oswald', sans-serif;
+      font-size: 0.75rem;
+      color: var(--alert);
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      display: block;
+    }
+    .exfil-value {
+      font-size: 0.82rem;
+      color: var(--faded);
+      margin-top: 2px;
+    }
+
+    /* ── ROUND COUNTER FOOTER ───────────────────────── */
+    .round-footer {
+      margin-top: 60px;
+      padding: 20px 0;
+      text-align: center;
+      border-top: 1px solid rgba(212,98,10,0.2);
+    }
+    .round-display {
+      font-family: 'Black Ops One', sans-serif;
+      font-size: 0.9rem;
+      color: var(--faded);
+      letter-spacing: 0.22em;
+    }
+    .round-display span {
+      color: var(--muzzle);
+      font-size: 1.3rem;
+    }
+    .round-tagline {
+      font-size: 0.78rem;
+      color: var(--blood);
+      margin-top: 6px;
+      letter-spacing: 0.12em;
+    }
+
+    /* ── UTILITIES ──────────────────────────────────── */
+    .caution-stripe { margin: 32px 0 0; }
+
+    @media (max-width: 600px) {
+      .hero { padding: 22px 16px; }
+      .page { padding: 72px 14px 40px; }
+      .hero h1 { font-size: 2.2rem; }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+<div class="vignette"></div>
+<div class="film-grain"></div>
+
+<!-- HUD BAR -->
+<div class="hud-bar">
+  <span class="hud-left">ROUND: ∞</span>
+  <span class="hud-mid">⚠ CLASSIFIED TRANSMISSION ⚠</span>
+  <span class="hud-right">DOSSIER: TERRY-115</span>
+</div>
+
+<main class="page">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="case-tag">CASE FILE // 115-TERRY // NORTHERN DIVISION</div>
+    <h1>TERRY, RHYS</h1>
+    <div class="hero-designation">Solution Support Specialist</div>
+
+    <div class="hero-stats">
+      <div class="stat-block">
+        <span class="stat-num">3+</span>
+        <span class="stat-label">Years Active</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">∞</span>
+        <span class="stat-label">Tickets Closed</span>
+      </div>
+      <div class="stat-block">
+        <span class="stat-num">115</span>
+        <span class="stat-label">Insights Extracted</span>
+      </div>
+    </div>
+
+    <div class="hero-location">Manchester, UK</div>
+  </section>
+
+  <!-- INTEL BRIEFING -->
+  <div class="section-head"><h2>Intel Briefing</h2></div>
+  <div class="briefing">
+    <p>
+      Asset TERRY has demonstrated consistent operational value as a front-line Solution Support Specialist.
+      Specialises in extracting actionable intelligence from Service Desk data pipelines, deploying
+      Power BI to transform raw incident logs into strategic insights. Effective under pressure,
+      capable of holding the line on SLAs while simultaneously identifying systemic weaknesses in
+      support operations. A force multiplier in any data-driven support environment.
+    </p>
+    <div class="briefing-stamp">VERIFIED</div>
+  </div>
+
+  <!-- DEPLOYMENTS -->
+  <div class="section-head"><h2>Field Deployments</h2></div>
+
+  <div class="deployment current">
+    <div class="deployment-meta">
+      <div>
+        <div class="deployment-title">Solution Support Specialist</div>
+        <div class="deployment-org">[Current Organisation] — Manchester, UK</div>
+      </div>
+      <div class="deployment-dates">
+        20XX — PRESENT<br>
+        <span class="badge-active">● ACTIVE</span>
+      </div>
+    </div>
+    <ul>
+      <li>Design and maintain Power BI dashboards drawing on live Service Desk data to surface recurring incident patterns and capacity trends</li>
+      <li>Provide targeted insights to team leads, translating volume and resolution-time data into actionable recommendations</li>
+      <li>Manage escalations across support tiers, ensuring SLA compliance and clear communication with stakeholders</li>
+      <li>Build and refine reporting processes that reduce time-to-insight and improve operational decision-making</li>
+    </ul>
+  </div>
+
+  <div class="deployment">
+    <div class="deployment-meta">
+      <div>
+        <div class="deployment-title">IT Support Analyst</div>
+        <div class="deployment-org">[Previous Organisation] — Manchester, UK</div>
+      </div>
+      <div class="deployment-dates">20XX — 20XX</div>
+    </div>
+    <ul>
+      <li>Delivered first and second-line technical support across hardware, software and network issues</li>
+      <li>Logged, triaged and prioritised incidents within the Service Desk platform in line with SLA targets</li>
+      <li>Contributed to knowledge base documentation to reduce repeat contacts and improve self-service resolution</li>
+    </ul>
+  </div>
+
+  <div class="deployment">
+    <div class="deployment-meta">
+      <div>
+        <div class="deployment-title">Service Desk Technician</div>
+        <div class="deployment-org">[First Post] — Greater Manchester</div>
+      </div>
+      <div class="deployment-dates">20XX — 20XX</div>
+    </div>
+    <ul>
+      <li>Handled inbound support requests via phone, email and ticketing system, resolving common incidents to first-contact resolution where possible</li>
+      <li>Maintained accurate records of all interactions and resolutions within the ITSM platform</li>
+    </ul>
+  </div>
+
+  <!-- CAPABILITIES -->
+  <div class="section-head"><h2>Capabilities &amp; Loadout</h2></div>
+  <div class="perks-grid">
+    <div class="perk">
+      <span class="perk-icon">📊</span>
+      <span class="perk-name">Power BI</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">🎫</span>
+      <span class="perk-name">Service Desk Operations</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">🔍</span>
+      <span class="perk-name">Data Analysis</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">📋</span>
+      <span class="perk-name">Incident Management</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">⏱</span>
+      <span class="perk-name">SLA Management</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">📈</span>
+      <span class="perk-name">Insight Generation</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">🗂</span>
+      <span class="perk-name">Documentation</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip"></div>
+        <div class="perk-pip"></div>
+      </div>
+    </div>
+    <div class="perk">
+      <span class="perk-icon">🤝</span>
+      <span class="perk-name">Stakeholder Comms</span>
+      <div class="perk-level">
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip filled"></div>
+        <div class="perk-pip"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXFIL / CONTACT -->
+  <div class="section-head"><h2>Exfil Coordinates</h2></div>
+  <div class="exfil-grid">
+    <a href="mailto:rhys@example.com" class="exfil-item">
+      <span class="exfil-key">[E]</span>
+      <span class="exfil-label">Email Transmission</span>
+      <div class="exfil-value">rhys@example.com</div>
+    </a>
+    <a href="https://linkedin.com/in/rhys-terry" target="_blank" class="exfil-item">
+      <span class="exfil-key">[L]</span>
+      <span class="exfil-label">LinkedIn Intel</span>
+      <div class="exfil-value">linkedin.com/in/rhys-terry</div>
+    </a>
+    <a href="./Rhys-Terry-CV.pdf" download class="exfil-item">
+      <span class="exfil-key">[D]</span>
+      <span class="exfil-label">Download Dossier</span>
+      <div class="exfil-value">Rhys-Terry-CV.pdf</div>
+    </a>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="caution-stripe"></div>
+  <footer class="round-footer">
+    <div class="round-display">ROUND <span>∞</span> — STILL STANDING</div>
+    <div class="round-tagline">Semper Data. Semper Insight.</div>
+  </footer>
+
+</main>
+
+<script>
+// ── WaW ZOMBIES BACKGROUND ──────────────────────────────────────
+(function () {
+  const canvas = document.getElementById('bg');
+  const ctx    = canvas.getContext('2d');
+  let noiseOff = 0;
+
+  // Flickering light state
+  let flkBase  = 0.72;
+  let flkTarget = 0.72;
+  let flkTimer  = 0;
+
+  // Chalk scrawl marks (pre-computed)
+  let marks = [];
+
+  function resize() {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+    buildMarks();
+  }
+
+  // Random chalk/stencil decorations
+  function buildMarks() {
+    marks = [];
+    const W = canvas.width, H = canvas.height;
+    // Brick mortar lines (horizontal)
+    const brickH = 28;
+    for (let y = 0; y < H; y += brickH) {
+      marks.push({ type: 'hline', y, alpha: 0.06 + Math.random() * 0.06 });
+    }
+    // Brick mortar lines (vertical, offset every other row)
+    const brickW = 62;
+    for (let row = 0; row * brickH < H; row++) {
+      const offset = (row % 2) * (brickW / 2);
+      for (let x = offset; x < W + brickW; x += brickW) {
+        const y0 = row * brickH;
+        marks.push({ type: 'vline', x, y0, y1: y0 + brickH, alpha: 0.05 + Math.random() * 0.05 });
+      }
+    }
+    // Chalk text fragments
+    const texts = ['NACHT', '115', 'ZOMBIES', 'ROUND 1', 'HELP', 'DER RIESE', '⚠', 'K/D', 'PACK-A-PUNCH'];
+    for (let i = 0; i < 6; i++) {
+      marks.push({
+        type: 'text',
+        str:   texts[Math.floor(Math.random() * texts.length)],
+        x:     W * (0.05 + Math.random() * 0.88),
+        y:     H * (0.08 + Math.random() * 0.84),
+        rot:   (Math.random() - 0.5) * 0.3,
+        alpha: 0.03 + Math.random() * 0.05,
+        sz:    14 + Math.floor(Math.random() * 22),
+      });
+    }
+  }
+
+  function draw(t) {
+    const W = canvas.width, H = canvas.height;
+    ctx.clearRect(0, 0, W, H);
+
+    // ── Base wall colour — dark olive/concrete ──────────────────
+    const wall = ctx.createLinearGradient(0, 0, 0, H);
+    wall.addColorStop(0,   '#0a0a06');
+    wall.addColorStop(0.5, '#0d0d08');
+    wall.addColorStop(1,   '#0b0b07');
+    ctx.fillStyle = wall;
+    ctx.fillRect(0, 0, W, H);
+
+    // ── Brick/mortar lines ──────────────────────────────────────
+    for (const m of marks) {
+      if (m.type === 'hline') {
+        ctx.strokeStyle = `rgba(40,38,24,${m.alpha})`;
+        ctx.lineWidth   = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, m.y);
+        ctx.lineTo(W, m.y);
+        ctx.stroke();
+      } else if (m.type === 'vline') {
+        ctx.strokeStyle = `rgba(40,38,24,${m.alpha})`;
+        ctx.lineWidth   = 1;
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y0);
+        ctx.lineTo(m.x, m.y1);
+        ctx.stroke();
+      }
+    }
+
+    // ── Chalk scrawl text ───────────────────────────────────────
+    ctx.font = `bold 14px 'Special Elite', serif`;
+    for (const m of marks) {
+      if (m.type !== 'text') continue;
+      ctx.save();
+      ctx.translate(m.x, m.y);
+      ctx.rotate(m.rot);
+      ctx.fillStyle   = `rgba(210,200,160,${m.alpha})`;
+      ctx.font        = `bold ${m.sz}px 'Black Ops One', sans-serif`;
+      ctx.fillText(m.str, 0, 0);
+      ctx.restore();
+    }
+
+    // ── Flickering overhead light ───────────────────────────────
+    flkTimer -= 16;
+    if (flkTimer <= 0) {
+      flkTarget = Math.random() < 0.08
+        ? 0.15 + Math.random() * 0.2   // rare blackout flicker
+        : 0.5  + Math.random() * 0.45;
+      flkTimer  = 60 + Math.random() * 280;
+    }
+    flkBase += (flkTarget - flkBase) * 0.12;
+    const flk = flkBase + Math.sin(t * 0.007) * 0.04;
+
+    // Overhead bulb glow — originates from top-centre
+    const lx = W * 0.5, ly = H * -0.02;
+    const radius = Math.min(W, H) * 1.1;
+    const lightG = ctx.createRadialGradient(lx, ly, 0, lx, ly, radius);
+    lightG.addColorStop(0,    `rgba(180,155,90,${flk * 0.55})`);
+    lightG.addColorStop(0.18, `rgba(120,95,45,${flk * 0.28})`);
+    lightG.addColorStop(0.45, `rgba(60,45,18,${flk * 0.12})`);
+    lightG.addColorStop(1,    'rgba(0,0,0,0)');
+    ctx.fillStyle = lightG;
+    ctx.fillRect(0, 0, W, H);
+
+    // Subtle warm pooling at floor
+    const floorG = ctx.createLinearGradient(0, H * 0.7, 0, H);
+    floorG.addColorStop(0, 'rgba(0,0,0,0)');
+    floorG.addColorStop(1, `rgba(10,8,4,${0.55 + (1 - flk) * 0.3})`);
+    ctx.fillStyle = floorG;
+    ctx.fillRect(0, H * 0.7, W, H * 0.3);
+
+    // ── Film-age sepia tint (very subtle, varies with flicker) ──
+    ctx.fillStyle = `rgba(30,22,8,${0.08 + (1 - flk) * 0.12})`;
+    ctx.fillRect(0, 0, W, H);
+
+    requestAnimationFrame(draw);
+  }
+
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+</script>
+
+</body>
+</html>
