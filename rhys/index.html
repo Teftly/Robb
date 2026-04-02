@@ -7,17 +7,25 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #201f1e;
-    --surface: #252423;
-    --card:    #2b2a29;
-    --border:  #3b3a39;
+    --bg:      #1e1e1e;
+    --surface: #252526;
+    --card:    #2d2d2d;
+    --border:  #3e3e3e;
     --blue:    #0078d4;
     --teal:    #00b294;
     --gold:    #e8b400;
     --orange:  #ca5010;
-    --text:    #f3f2f1;
-    --muted:   #a19f9d;
-    --subtle:  #605e5c;
+    --text:    #d4d4d4;
+    --muted:   #9d9d9d;
+    --subtle:  #6a6a6a;
+
+    /* VS Code default dark SQL token colours */
+    --sql-kw:   #569cd6;   /* SELECT FROM WHERE ORDER */
+    --sql-col:  #9cdcfe;   /* column names            */
+    --sql-val:  #ce9178;   /* string literals          */
+    --sql-fn:   #dcdcaa;   /* functions                */
+    --sql-tbl:  #4ec9b0;   /* table names              */
+    --sql-cmt:  #6a9955;   /* -- comments              */
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -122,12 +130,12 @@
     font-size: 11px; color: var(--subtle);
     margin-bottom: 20px; line-height: 2;
   }
-  .kw  { color: var(--blue); font-weight: 600; }
-  .col { color: var(--teal); }
-  .val { color: #8dc89c; }
-  .fn  { color: var(--orange); }
-  .tbl { color: var(--gold); }
-  .cmt { color: var(--subtle); }
+  .kw  { color: var(--sql-kw);  font-weight: 600; }
+  .col { color: var(--sql-col); }
+  .val { color: var(--sql-val); }
+  .fn  { color: var(--sql-fn);  }
+  .tbl { color: var(--sql-tbl); }
+  .cmt { color: var(--sql-cmt); }
 
   .hero-name {
     font-size: clamp(28px, 6vw, 40px);
@@ -283,7 +291,13 @@
       --orange:  #8a3301;
       --text:    #1a1a1a;
       --muted:   #484644;
-      --subtle:  #605e5c;
+      --subtle:  #767676;
+      --sql-kw:  #0000ff;
+      --sql-col: #001080;
+      --sql-val: #a31515;
+      --sql-fn:  #795e26;
+      --sql-tbl: #267f99;
+      --sql-cmt: #008000;
     }
     body { background: #fff; }
     .nav-wrap { display: none; }
