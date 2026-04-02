@@ -7,20 +7,22 @@
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg:      #1a1a2e;
-    --surface: #0f3460;
-    --card:    #1a2744;
-    --yellow:  #f2c80f;
-    --orange:  #fd7b54;
-    --teal:    #01b8aa;
-    --blue:    #118dff;
-    --purple:  #8b5cf6;
-    --text:    #e8eaf0;
-    --muted:   #8892a4;
-    --border:  #2a3a5c;
+    --bg:      #201f1e;
+    --surface: #252423;
+    --card:    #2b2a29;
+    --border:  #3b3a39;
+    --blue:    #0078d4;
+    --teal:    #00b294;
+    --gold:    #e8b400;
+    --orange:  #ca5010;
+    --text:    #f3f2f1;
+    --muted:   #a19f9d;
+    --subtle:  #605e5c;
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
 
   body {
     background: var(--bg);
@@ -32,239 +34,309 @@
   }
 
   .page {
-    max-width: 680px;
+    max-width: 760px;
     margin: 0 auto;
-    padding: 28px 16px 48px;
+    padding: 0 16px 56px;
   }
+
+  /* ── NAV ── */
+  .nav-wrap {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+  .nav {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 10px 16px;
+    display: flex;
+    gap: 8px;
+  }
+  .nav-box {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 14px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    text-decoration: none;
+    background: var(--card);
+    transition: border-color .15s, background .15s;
+    min-width: 0;
+  }
+  .nav-box:hover {
+    border-color: var(--blue);
+    background: var(--surface);
+  }
+  .nav-num { font-size: 9px; color: var(--subtle); letter-spacing: .1em; margin-bottom: 1px; }
+  .nav-label { font-size: 11px; color: var(--muted); font-weight: 500; white-space: nowrap; }
+  .nav-box:hover .nav-label { color: var(--text); }
 
   /* ── TOPBAR ── */
   .topbar {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 20px;
+    margin-bottom: 18px;
+    padding-top: 4px;
     opacity: 0;
-    animation: fadeUp .4s ease forwards;
+    animation: fadeUp .35s ease forwards;
   }
-  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
-  .topbar-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .topbar-label {
+    font-size: 10px; color: var(--subtle);
+    letter-spacing: .08em; text-transform: uppercase;
+    flex: 1; min-width: 0; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
   .live-badge {
-    font-size: 10px; padding: 2px 10px; border-radius: 20px;
-    background: rgba(242,200,15,.1); color: var(--yellow);
-    border: 1px solid rgba(242,200,15,.3); letter-spacing: .06em; flex-shrink: 0;
+    font-size: 10px; padding: 2px 10px; border-radius: 2px;
+    background: rgba(232,180,0,.08); color: var(--gold);
+    border: 1px solid rgba(232,180,0,.25);
+    letter-spacing: .06em; flex-shrink: 0;
   }
 
   /* ── HERO ── */
   .hero {
-    background: linear-gradient(135deg, #0f3460 0%, #1a2744 60%, #0d1b3e 100%);
+    background: linear-gradient(135deg, #252423 0%, #2b2a29 100%);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 26px 22px 22px;
-    margin-bottom: 14px;
+    border-top: 2px solid var(--blue);
+    border-radius: 2px;
+    padding: 28px 24px 24px;
+    margin-bottom: 12px;
     position: relative;
     overflow: hidden;
     opacity: 0;
-    animation: fadeUp .4s ease .08s forwards;
+    animation: fadeUp .35s ease .07s forwards;
   }
-  .hero::before {
+  .hero::after {
     content: '';
-    position: absolute; top: -50px; right: -50px;
-    width: 200px; height: 200px;
-    background: radial-gradient(circle, rgba(17,141,255,.18) 0%, transparent 70%);
+    position: absolute; top: -60px; right: -60px;
+    width: 220px; height: 220px;
+    background: radial-gradient(circle, rgba(0,120,212,.1) 0%, transparent 70%);
     pointer-events: none;
   }
-  .hero-sql { font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.9; }
+  .hero-sql {
+    font-size: 11px; color: var(--subtle);
+    margin-bottom: 20px; line-height: 2;
+  }
   .kw  { color: var(--blue); font-weight: 600; }
   .col { color: var(--teal); }
-  .val { color: #a8d8a0; }
+  .val { color: #8dc89c; }
   .fn  { color: var(--orange); }
-  .tbl { color: var(--yellow); }
-  .cmt { color: var(--muted); }
+  .tbl { color: var(--gold); }
+  .cmt { color: var(--subtle); }
 
   .hero-name {
-    font-size: clamp(26px, 7vw, 38px);
+    font-size: clamp(28px, 6vw, 40px);
     font-weight: 700;
     letter-spacing: -.02em;
     line-height: 1;
-    margin-bottom: 5px;
-    background: linear-gradient(90deg, #fff 0%, #c8d8f0 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    margin-bottom: 6px;
+    color: var(--text);
   }
-  .hero-role { font-size: 12px; color: var(--teal); font-weight: 600; letter-spacing: .04em; margin-bottom: 18px; }
-  .contacts { display: flex; flex-direction: column; gap: 8px; }
-  .contact-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+  .hero-role {
+    font-size: 12px; color: var(--teal);
+    font-weight: 500; letter-spacing: .05em;
+    margin-bottom: 22px;
+  }
+  .contacts { display: flex; flex-direction: column; gap: 9px; }
+  .contact-item { display: flex; align-items: center; gap: 9px; font-size: 11px; color: var(--muted); }
   .contact-item a { color: var(--muted); text-decoration: none; }
   .contact-item a:hover { color: var(--teal); }
+  .contact-item svg { flex-shrink: 0; }
 
   /* ── KPI STRIP ── */
   .kpi-strip {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     opacity: 0;
-    animation: fadeUp .4s ease .16s forwards;
+    animation: fadeUp .35s ease .14s forwards;
   }
   .kpi {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 14px;
+    border-radius: 2px;
+    padding: 14px 12px;
     position: relative;
     overflow: hidden;
   }
-  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
-  .kpi.y::before { background: var(--yellow); }
-  .kpi.t::before { background: var(--teal); }
-  .kpi.o::before { background: var(--orange); }
-  .kpi.b::before { background: var(--blue); }
-  .kpi-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
-  .kpi-val { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
-  .kpi.y .kpi-val { color: var(--yellow); }
-  .kpi.t .kpi-val { color: var(--teal); }
-  .kpi.o .kpi-val { color: var(--orange); }
-  .kpi.b .kpi-val { color: var(--blue); }
-  .kpi-sub { font-size: 10px; color: var(--muted); }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .kpi.gold::before  { background: var(--gold); }
+  .kpi.teal::before  { background: var(--teal); }
+  .kpi.blue::before  { background: var(--blue); }
+  .kpi.orange::before { background: var(--orange); }
+  .kpi-label { font-size: 9px; color: var(--subtle); letter-spacing: .06em; margin-bottom: 8px; }
+  .kpi-val { font-size: 26px; font-weight: 700; line-height: 1; margin-bottom: 4px; color: var(--text); }
+  .kpi-sub { font-size: 9.5px; color: var(--muted); }
 
   /* ── SECTION CARD ── */
   .section-card {
     background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 4px;
+    border-radius: 2px;
     overflow: hidden;
-    margin-bottom: 14px;
+    margin-bottom: 12px;
     opacity: 0;
-    animation: fadeUp .4s ease forwards;
+    animation: fadeUp .35s ease forwards;
   }
-  .section-card:nth-child(1) { animation-delay: .24s; }
-  .section-card:nth-child(2) { animation-delay: .32s; }
-  .section-card:nth-child(3) { animation-delay: .40s; }
-  .section-card:nth-child(4) { animation-delay: .48s; }
+  .section-card:nth-of-type(1) { animation-delay: .21s; }
+  .section-card:nth-of-type(2) { animation-delay: .28s; }
 
   .sec-header {
     display: flex;
     align-items: flex-start;
     gap: 10px;
-    padding: 12px 16px;
-    background: rgba(15,52,96,.7);
+    padding: 11px 16px;
+    background: var(--surface);
     border-bottom: 1px solid var(--border);
   }
-  .sec-icon { width: 6px; height: 6px; border-radius: 1px; flex-shrink: 0; margin-top: 4px; }
-  .sec-sql { font-size: 10px; line-height: 1.6; word-break: break-word; }
-  .sec-body { padding: 18px 16px; }
+  .sec-bar { width: 3px; border-radius: 1px; flex-shrink: 0; align-self: stretch; min-height: 14px; }
+  .sec-sql { font-size: 10.5px; line-height: 1.8; }
+  .sec-body { padding: 20px 18px; }
 
   /* ── EXPERIENCE ── */
   .exp-item {
-    padding-left: 14px;
-    padding-bottom: 18px;
-    margin-bottom: 18px;
+    padding-left: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 20px;
     border-bottom: 1px solid var(--border);
     position: relative;
   }
   .exp-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
   .exp-item::before {
     content: '';
-    position: absolute; left: 0; top: 5px;
-    width: 6px; height: 6px; border-radius: 50%;
-    background: var(--teal);
-    box-shadow: 0 0 8px rgba(1,184,170,.5);
+    position: absolute; left: 0; top: 6px;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--blue);
   }
-  .exp-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
-  .exp-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
-  .exp-company { color: var(--orange); font-size: 11px; font-weight: 600; }
+  .exp-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .exp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 11px; }
+  .exp-company { color: var(--teal); font-size: 11px; font-weight: 500; }
   .exp-date {
-    font-size: 10px; color: var(--yellow);
-    background: rgba(242,200,15,.08);
-    border: 1px solid rgba(242,200,15,.2);
+    font-size: 10px; color: var(--muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
     padding: 2px 8px; border-radius: 2px;
   }
   .exp-bullets { list-style: none; }
   .exp-bullets li {
     font-size: 11.5px; color: var(--muted);
     padding: 3px 0 3px 14px; position: relative;
+    line-height: 1.65;
   }
   .exp-bullets li::before {
-    content: '▸'; position: absolute; left: 0;
-    color: var(--blue); font-size: 10px; top: 4px;
+    content: '–'; position: absolute; left: 0;
+    color: var(--subtle); font-size: 11px;
   }
 
-  /* ── SKILL BARS ── */
-  .skill-group { margin-bottom: 20px; }
-  .skill-group:last-child { margin-bottom: 0; }
-  .skill-group-label {
-    font-size: 9.5px; color: var(--muted);
-    text-transform: uppercase; letter-spacing: .1em;
-    border-left: 2px solid var(--purple);
-    padding-left: 8px; margin-bottom: 12px;
+  /* ── COMPETENCIES ── */
+  .comp-group { margin-bottom: 20px; }
+  .comp-group:last-child { margin-bottom: 0; }
+  .comp-label {
+    font-size: 10px; color: var(--subtle);
+    margin-bottom: 10px; padding-bottom: 6px;
+    border-bottom: 1px solid var(--border);
   }
-  .skill-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-  .skill-name { font-size: 11.5px; color: var(--text); width: 110px; flex-shrink: 0; }
-  .skill-track {
-    flex: 1; height: 5px;
-    background: rgba(255,255,255,.06);
-    border-radius: 3px; overflow: hidden;
+  .comp-label span { color: var(--blue); }
+  .comp-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .comp-tag {
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    background: var(--surface);
+    transition: border-color .12s, color .12s;
   }
-  .skill-fill {
-    height: 100%; border-radius: 3px;
-    animation: growBar 1s ease .6s both;
-    transform-origin: left;
-  }
-  .skill-fill.t { background: linear-gradient(90deg, var(--teal), rgba(1,184,170,.4)); }
-  .skill-fill.b { background: linear-gradient(90deg, var(--blue), rgba(17,141,255,.4)); }
-  .skill-fill.y { background: linear-gradient(90deg, var(--yellow), rgba(242,200,15,.4)); }
-  .skill-fill.o { background: linear-gradient(90deg, var(--orange), rgba(253,123,84,.4)); }
-  .skill-fill.p { background: linear-gradient(90deg, var(--purple), rgba(139,92,246,.4)); }
-  .skill-pct { font-size: 10px; color: var(--muted); width: 30px; text-align: right; flex-shrink: 0; }
-
-  /* ── TECH TAGS ── */
-  .tech-tags { display: flex; flex-wrap: wrap; gap: 7px; }
-  .tag {
-    font-size: 10.5px; padding: 4px 10px;
-    border-radius: 2px; border: 1px solid;
-  }
-  .tag.t { color: var(--teal);   border-color: rgba(1,184,170,.35);   background: rgba(1,184,170,.07); }
-  .tag.b { color: var(--blue);   border-color: rgba(17,141,255,.35);  background: rgba(17,141,255,.07); }
-  .tag.y { color: var(--yellow); border-color: rgba(242,200,15,.35);  background: rgba(242,200,15,.07); }
-  .tag.o { color: var(--orange); border-color: rgba(253,123,84,.35);  background: rgba(253,123,84,.07); }
-  .tag.p { color: var(--purple); border-color: rgba(139,92,246,.35);  background: rgba(139,92,246,.07); }
+  .comp-tag:hover { border-color: var(--blue); color: var(--text); }
 
   /* ── FOOTER ── */
   .footer {
-    margin-top: 20px; font-size: 10px;
-    color: rgba(136,146,164,.35);
+    margin-top: 18px; font-size: 10px;
+    color: var(--subtle);
     text-align: center;
     opacity: 0;
-    animation: fadeUp .4s ease .65s forwards;
+    animation: fadeUp .35s ease .42s forwards;
   }
-  .footer .kw { color: rgba(17,141,255,.35); }
 
   /* ── ANIMATIONS ── */
   @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(10px); }
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
-  @keyframes growBar {
-    from { transform: scaleX(0); }
-    to   { transform: scaleX(1); }
+
+  /* ── PRINT ── */
+  @media print {
+    :root {
+      --bg:      #ffffff;
+      --surface: #f5f5f4;
+      --card:    #ffffff;
+      --border:  #d2d0ce;
+      --blue:    #0063b1;
+      --teal:    #008575;
+      --gold:    #7a5f00;
+      --orange:  #8a3301;
+      --text:    #1a1a1a;
+      --muted:   #484644;
+      --subtle:  #605e5c;
+    }
+    body { background: #fff; }
+    .nav-wrap { display: none; }
+    .live-badge { display: none; }
+    .hero {
+      background: var(--surface) !important;
+      border-top-color: var(--blue);
+    }
+    .hero::after { display: none; }
+    .hero-name { color: #1a1a1a; }
+    .section-card, .kpi { box-shadow: none; }
+    .comp-tag:hover { border-color: var(--border); color: var(--muted); }
+    * {
+      animation: none !important;
+      opacity: 1 !important;
+      transform: none !important;
+    }
   }
 </style>
 </head>
 <body>
+
+<!-- NAV -->
+<div class="nav-wrap">
+  <nav class="nav">
+    <a href="#profile" class="nav-box">
+      <span class="nav-num">01</span>
+      <span class="nav-label">Profile</span>
+    </a>
+    <a href="#experience" class="nav-box">
+      <span class="nav-num">02</span>
+      <span class="nav-label">Experience</span>
+    </a>
+    <a href="#competencies" class="nav-box">
+      <span class="nav-num">03</span>
+      <span class="nav-label">Competencies</span>
+    </a>
+  </nav>
+</div>
+
 <div class="page">
 
   <!-- TOPBAR -->
   <div class="topbar">
-    <div class="dot" style="background:var(--yellow)"></div>
-    <div class="dot" style="background:var(--orange)"></div>
-    <div class="dot" style="background:var(--teal)"></div>
+    <div class="dot" style="background:#0078d4"></div>
+    <div class="dot" style="background:#00b294"></div>
+    <div class="dot" style="background:#e8b400"></div>
     <span class="topbar-label">rhys_terry.report · Power BI CV Dashboard</span>
     <span class="live-badge">● LIVE</span>
   </div>
 
   <!-- HERO -->
-  <div class="hero">
+  <div id="profile" class="hero">
     <div class="hero-sql">
       <span class="kw">SELECT</span> <span class="col">full_name</span>, <span class="col">role</span>, <span class="col">location</span><br>
       <span class="kw">FROM</span> <span class="tbl">candidates</span><br>
@@ -275,19 +347,19 @@
     <div class="hero-role">Senior Data Engineer &amp; BI Developer</div>
     <div class="contacts">
       <div class="contact-item">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
         <a href="mailto:rhys@example.com">rhys@example.com</a>
       </div>
       <div class="contact-item">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91A16 16 0 0 0 12 15.91l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91A16 16 0 0 0 12 15.91l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
         +44 7700 000000
       </div>
       <div class="contact-item">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
         <a href="#">linkedin.com/in/rhysterry</a>
       </div>
       <div class="contact-item">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
         Manchester, UK
       </div>
     </div>
@@ -295,32 +367,32 @@
 
   <!-- KPI STRIP -->
   <div class="kpi-strip">
-    <div class="kpi y">
-      <div class="kpi-label">COUNT(years_experience)</div>
+    <div class="kpi gold">
+      <div class="kpi-label">COUNT(years_exp)</div>
       <div class="kpi-val">6+</div>
       <div class="kpi-sub">Years in Data &amp; BI</div>
     </div>
-    <div class="kpi t">
+    <div class="kpi teal">
       <div class="kpi-label">COUNT(DISTINCT tools)</div>
       <div class="kpi-val">12</div>
       <div class="kpi-sub">Technologies mastered</div>
     </div>
-    <div class="kpi o">
+    <div class="kpi orange">
       <div class="kpi-label">SUM(dashboards_built)</div>
       <div class="kpi-val">80+</div>
       <div class="kpi-sub">Reports delivered</div>
     </div>
-    <div class="kpi b">
-      <div class="kpi-label">AVG(stakeholder_rating)</div>
-      <div class="kpi-val">9.4</div>
-      <div class="kpi-sub">Out of 10</div>
+    <div class="kpi blue">
+      <div class="kpi-label">SUM(pipeline_records)</div>
+      <div class="kpi-val">50M+</div>
+      <div class="kpi-sub">Daily records processed</div>
     </div>
   </div>
 
   <!-- EXPERIENCE -->
-  <div class="section-card">
+  <div id="experience" class="section-card">
     <div class="sec-header">
-      <div class="sec-icon" style="background:var(--teal)"></div>
+      <div class="sec-bar" style="background:var(--teal)"></div>
       <div class="sec-sql">
         <span class="kw">SELECT</span> <span class="col">role</span>, <span class="col">company</span>, <span class="col">impact</span>
         <span class="kw">FROM</span> <span class="tbl">work_experience</span>
@@ -372,86 +444,75 @@
     </div>
   </div>
 
-  <!-- SKILL BARS -->
-  <div class="section-card">
+  <!-- COMPETENCIES -->
+  <div id="competencies" class="section-card">
     <div class="sec-header">
-      <div class="sec-icon" style="background:var(--yellow)"></div>
+      <div class="sec-bar" style="background:var(--gold)"></div>
       <div class="sec-sql">
-        <span class="kw">SELECT</span> <span class="col">skill</span>, <span class="fn">proficiency</span>(<span class="col">*</span>)
+        <span class="kw">SELECT</span> <span class="col">competency</span>, <span class="col">category</span>
         <span class="kw">FROM</span> <span class="tbl">core_skills</span>
         <span class="kw">GROUP BY</span> <span class="col">category</span>
+        <span class="kw">ORDER BY</span> <span class="col">category</span>
       </div>
     </div>
     <div class="sec-body">
 
-      <div class="skill-group">
-        <div class="skill-group-label">-- BI &amp; Visualisation</div>
-        <div class="skill-row"><span class="skill-name">Power BI</span><div class="skill-track"><div class="skill-fill t" style="width:96%"></div></div><span class="skill-pct">96%</span></div>
-        <div class="skill-row"><span class="skill-name">DAX</span><div class="skill-track"><div class="skill-fill t" style="width:90%"></div></div><span class="skill-pct">90%</span></div>
-        <div class="skill-row"><span class="skill-name">Power Query</span><div class="skill-track"><div class="skill-fill t" style="width:88%"></div></div><span class="skill-pct">88%</span></div>
-        <div class="skill-row"><span class="skill-name">Tableau</span><div class="skill-track"><div class="skill-fill t" style="width:72%"></div></div><span class="skill-pct">72%</span></div>
+      <div class="comp-group">
+        <div class="comp-label"><span class="cmt">-- BI &amp; Visualisation</span></div>
+        <div class="comp-tags">
+          <span class="comp-tag">Power BI</span>
+          <span class="comp-tag">DAX</span>
+          <span class="comp-tag">Power Query / M</span>
+          <span class="comp-tag">Tabular Editor</span>
+          <span class="comp-tag">DAX Studio</span>
+          <span class="comp-tag">SSRS</span>
+          <span class="comp-tag">Tableau</span>
+        </div>
       </div>
 
-      <div class="skill-group">
-        <div class="skill-group-label">-- Data &amp; SQL</div>
-        <div class="skill-row"><span class="skill-name">T-SQL / SQL</span><div class="skill-track"><div class="skill-fill y" style="width:95%"></div></div><span class="skill-pct">95%</span></div>
-        <div class="skill-row"><span class="skill-name">PySpark</span><div class="skill-track"><div class="skill-fill y" style="width:80%"></div></div><span class="skill-pct">80%</span></div>
-        <div class="skill-row"><span class="skill-name">Python</span><div class="skill-track"><div class="skill-fill y" style="width:78%"></div></div><span class="skill-pct">78%</span></div>
+      <div class="comp-group">
+        <div class="comp-label"><span class="cmt">-- Data Engineering &amp; SQL</span></div>
+        <div class="comp-tags">
+          <span class="comp-tag">T-SQL</span>
+          <span class="comp-tag">PySpark</span>
+          <span class="comp-tag">Python</span>
+          <span class="comp-tag">ETL / ELT Design</span>
+          <span class="comp-tag">Data Modelling</span>
+          <span class="comp-tag">Star Schema</span>
+          <span class="comp-tag">Data Warehousing</span>
+        </div>
       </div>
 
-      <div class="skill-group">
-        <div class="skill-group-label">-- Azure Platform</div>
-        <div class="skill-row"><span class="skill-name">Data Factory</span><div class="skill-track"><div class="skill-fill b" style="width:88%"></div></div><span class="skill-pct">88%</span></div>
-        <div class="skill-row"><span class="skill-name">Synapse</span><div class="skill-track"><div class="skill-fill b" style="width:82%"></div></div><span class="skill-pct">82%</span></div>
-        <div class="skill-row"><span class="skill-name">Databricks</span><div class="skill-track"><div class="skill-fill b" style="width:79%"></div></div><span class="skill-pct">79%</span></div>
-        <div class="skill-row"><span class="skill-name">Fabric</span><div class="skill-track"><div class="skill-fill b" style="width:68%"></div></div><span class="skill-pct">68%</span></div>
+      <div class="comp-group">
+        <div class="comp-label"><span class="cmt">-- Azure Platform</span></div>
+        <div class="comp-tags">
+          <span class="comp-tag">Data Factory</span>
+          <span class="comp-tag">Synapse Analytics</span>
+          <span class="comp-tag">Databricks</span>
+          <span class="comp-tag">Microsoft Fabric</span>
+          <span class="comp-tag">Azure SQL</span>
+          <span class="comp-tag">Power BI Premium</span>
+        </div>
       </div>
 
-      <div class="skill-group">
-        <div class="skill-group-label">-- Dev &amp; Workflow</div>
-        <div class="skill-row"><span class="skill-name">DAX Studio</span><div class="skill-track"><div class="skill-fill p" style="width:86%"></div></div><span class="skill-pct">86%</span></div>
-        <div class="skill-row"><span class="skill-name">Git / DevOps</span><div class="skill-track"><div class="skill-fill p" style="width:84%"></div></div><span class="skill-pct">84%</span></div>
-        <div class="skill-row"><span class="skill-name">Tabular Editor</span><div class="skill-track"><div class="skill-fill p" style="width:80%"></div></div><span class="skill-pct">80%</span></div>
+      <div class="comp-group">
+        <div class="comp-label"><span class="cmt">-- Dev &amp; Delivery</span></div>
+        <div class="comp-tags">
+          <span class="comp-tag">Git</span>
+          <span class="comp-tag">Azure DevOps</span>
+          <span class="comp-tag">CI/CD Pipelines</span>
+          <span class="comp-tag">Agile / Scrum</span>
+          <span class="comp-tag">Stakeholder Reporting</span>
+        </div>
       </div>
 
-    </div>
-  </div>
-
-  <!-- TECH STACK -->
-  <div class="section-card">
-    <div class="sec-header">
-      <div class="sec-icon" style="background:var(--orange)"></div>
-      <div class="sec-sql">
-        <span class="kw">SELECT</span> <span class="col">tool</span>
-        <span class="kw">FROM</span> <span class="tbl">tech_stack</span>
-        <span class="kw">WHERE</span> <span class="col">proficient</span> = <span class="val">TRUE</span>
-      </div>
-    </div>
-    <div class="sec-body">
-      <div class="tech-tags">
-        <span class="tag t">Power BI</span>
-        <span class="tag t">DAX Studio</span>
-        <span class="tag t">Tabular Editor</span>
-        <span class="tag y">T-SQL</span>
-        <span class="tag y">Python</span>
-        <span class="tag y">PySpark</span>
-        <span class="tag b">Azure</span>
-        <span class="tag b">Databricks</span>
-        <span class="tag b">Synapse</span>
-        <span class="tag b">Data Factory</span>
-        <span class="tag o">Fabric</span>
-        <span class="tag o">Power Query</span>
-        <span class="tag p">Git</span>
-        <span class="tag p">Azure DevOps</span>
-        <span class="tag t">Tableau</span>
-      </div>
     </div>
   </div>
 
   <!-- FOOTER -->
   <div class="footer">
-    <span class="kw">COMMIT</span>; <span class="cmt">-- All records verified. Hire immediately.</span><br>
-    Last refreshed: April 2026
+    <span class="kw">COMMIT</span><span class="cmt">; -- All records verified. Hire immediately.</span><br>
+    <span class="cmt">Last refreshed: April 2026</span>
   </div>
 
 </div>
