@@ -1,983 +1,459 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TERRY, R. — CLASSIFIED DOSSIER</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Special+Elite&family=Oswald:wght@300;400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --void:    #07070400;
-      --bunker:  #0d0d08;
-      --olive:   #1e1e10;
-      --dark-olive: #2a2a14;
-      --paper:   #c8b87a;
-      --chalk:   #ddd8c0;
-      --faded:   #9a9278;
-      --alert:   #d4620a;
-      --muzzle:  #f0a030;
-      --blood:   #7a1212;
-      --danger:  #c41a1a;
-      --rust:    #8b4010;
-      --stencil: #4a5c2a;
-      --caution: #f0c030;
-      --115:     #7b3af0;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rhys Terry — CV</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:      #1a1a2e;
+    --surface: #0f3460;
+    --card:    #1a2744;
+    --yellow:  #f2c80f;
+    --orange:  #fd7b54;
+    --teal:    #01b8aa;
+    --blue:    #118dff;
+    --purple:  #8b5cf6;
+    --text:    #e8eaf0;
+    --muted:   #8892a4;
+    --border:  #2a3a5c;
+  }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    html { scroll-behavior: smooth; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
 
-    body {
-      background: var(--bunker);
-      color: var(--chalk);
-      font-family: 'Special Elite', serif;
-      font-size: 16px;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
+  .page {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 28px 16px 48px;
+  }
 
-    /* ── FIXED BACKGROUND ───────────────────────────── */
-    #bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
+  /* ── TOPBAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    opacity: 0;
+    animation: fadeUp .4s ease forwards;
+  }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .topbar-label { font-size: 10px; color: var(--muted); letter-spacing: .1em; text-transform: uppercase; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .live-badge {
+    font-size: 10px; padding: 2px 10px; border-radius: 20px;
+    background: rgba(242,200,15,.1); color: var(--yellow);
+    border: 1px solid rgba(242,200,15,.3); letter-spacing: .06em; flex-shrink: 0;
+  }
 
-    /* ── OVERLAYS ───────────────────────────────────── */
-    .vignette {
-      position: fixed;
-      inset: 0;
-      z-index: 1;
-      pointer-events: none;
-      background: radial-gradient(
-        ellipse at 50% 40%,
-        transparent 30%,
-        rgba(0,0,0,0.55) 70%,
-        rgba(0,0,0,0.88) 100%
-      );
-    }
+  /* ── HERO ── */
+  .hero {
+    background: linear-gradient(135deg, #0f3460 0%, #1a2744 60%, #0d1b3e 100%);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 26px 22px 22px;
+    margin-bottom: 14px;
+    position: relative;
+    overflow: hidden;
+    opacity: 0;
+    animation: fadeUp .4s ease .08s forwards;
+  }
+  .hero::before {
+    content: '';
+    position: absolute; top: -50px; right: -50px;
+    width: 200px; height: 200px;
+    background: radial-gradient(circle, rgba(17,141,255,.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .hero-sql { font-size: 11px; color: var(--muted); margin-bottom: 16px; line-height: 1.9; }
+  .kw  { color: var(--blue); font-weight: 600; }
+  .col { color: var(--teal); }
+  .val { color: #a8d8a0; }
+  .fn  { color: var(--orange); }
+  .tbl { color: var(--yellow); }
+  .cmt { color: var(--muted); }
 
-    .film-grain {
-      position: fixed;
-      inset: 0;
-      z-index: 2;
-      pointer-events: none;
-      opacity: 0.04;
-      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-      background-size: 200px 200px;
-    }
+  .hero-name {
+    font-size: clamp(26px, 7vw, 38px);
+    font-weight: 700;
+    letter-spacing: -.02em;
+    line-height: 1;
+    margin-bottom: 5px;
+    background: linear-gradient(90deg, #fff 0%, #c8d8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .hero-role { font-size: 12px; color: var(--teal); font-weight: 600; letter-spacing: .04em; margin-bottom: 18px; }
+  .contacts { display: flex; flex-direction: column; gap: 8px; }
+  .contact-item { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+  .contact-item a { color: var(--muted); text-decoration: none; }
+  .contact-item a:hover { color: var(--teal); }
 
-    /* ── GROUND FOG ──────────────────────────────────── */
-    .ground-fog {
-      position: fixed;
-      bottom: 0; left: 0; right: 0;
-      height: 260px;
-      z-index: 3;
-      pointer-events: none;
-      overflow: hidden;
-    }
-    .fog-layer {
-      position: absolute;
-      bottom: 0;
-      width: 300%;
-      height: 100%;
-      background: repeating-linear-gradient(
-        90deg,
-        transparent 0%,
-        rgba(210,210,185,0.07) 8%,
-        rgba(210,210,185,0.13) 15%,
-        rgba(210,210,185,0.06) 22%,
-        transparent 30%
-      );
-    }
-    .fog-layer:nth-child(1) { animation: fogDrift 22s linear infinite; }
-    .fog-layer:nth-child(2) { animation: fogDrift 34s linear infinite reverse; opacity: 0.6; bottom: -20px; }
-    .fog-layer:nth-child(3) { animation: fogDrift 18s linear infinite; opacity: 0.35; bottom: 30px; }
-    @keyframes fogDrift {
-      from { transform: translateX(0); }
-      to   { transform: translateX(-33.33%); }
-    }
-    .fog-fade {
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(to bottom, transparent 0%, rgba(14,12,8,0.55) 100%);
-    }
+  /* ── KPI STRIP ── */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+    opacity: 0;
+    animation: fadeUp .4s ease .16s forwards;
+  }
+  .kpi {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 14px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; }
+  .kpi.y::before { background: var(--yellow); }
+  .kpi.t::before { background: var(--teal); }
+  .kpi.o::before { background: var(--orange); }
+  .kpi.b::before { background: var(--blue); }
+  .kpi-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 6px; }
+  .kpi-val { font-size: 28px; font-weight: 700; line-height: 1; margin-bottom: 3px; }
+  .kpi.y .kpi-val { color: var(--yellow); }
+  .kpi.t .kpi-val { color: var(--teal); }
+  .kpi.o .kpi-val { color: var(--orange); }
+  .kpi.b .kpi-val { color: var(--blue); }
+  .kpi-sub { font-size: 10px; color: var(--muted); }
 
-    /* ── CAUTION STRIPE ─────────────────────────────── */
-    .caution-stripe {
-      background: repeating-linear-gradient(
-        -45deg,
-        var(--caution),
-        var(--caution) 10px,
-        #1a1a00 10px,
-        #1a1a00 20px
-      );
-      height: 8px;
-      width: 100%;
-    }
+  /* ── SECTION CARD ── */
+  .section-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 14px;
+    opacity: 0;
+    animation: fadeUp .4s ease forwards;
+  }
+  .section-card:nth-child(1) { animation-delay: .24s; }
+  .section-card:nth-child(2) { animation-delay: .32s; }
+  .section-card:nth-child(3) { animation-delay: .40s; }
+  .section-card:nth-child(4) { animation-delay: .48s; }
 
-    /* ── TOP HUD BAR ────────────────────────────────── */
-    .hud-bar {
-      position: fixed;
-      top: 0; left: 0; right: 0;
-      z-index: 50;
-      background: rgba(0,0,0,0.82);
-      border-bottom: 2px solid var(--alert);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 24px;
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 11px;
-      letter-spacing: 0.12em;
-    }
-    .hud-bar .hud-left  { color: var(--caution); }
-    .hud-bar .hud-mid   { color: var(--danger);  font-size: 10px; animation: blink 1.8s step-end infinite; }
-    .hud-bar .hud-right { color: var(--faded);   }
+  .sec-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 12px 16px;
+    background: rgba(15,52,96,.7);
+    border-bottom: 1px solid var(--border);
+  }
+  .sec-icon { width: 6px; height: 6px; border-radius: 1px; flex-shrink: 0; margin-top: 4px; }
+  .sec-sql { font-size: 10px; line-height: 1.6; word-break: break-word; }
+  .sec-body { padding: 18px 16px; }
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50%       { opacity: 0; }
-    }
+  /* ── EXPERIENCE ── */
+  .exp-item {
+    padding-left: 14px;
+    padding-bottom: 18px;
+    margin-bottom: 18px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+  }
+  .exp-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .exp-item::before {
+    content: '';
+    position: absolute; left: 0; top: 5px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--teal);
+    box-shadow: 0 0 8px rgba(1,184,170,.5);
+  }
+  .exp-title { font-size: 13px; font-weight: 700; color: #fff; margin-bottom: 4px; }
+  .exp-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+  .exp-company { color: var(--orange); font-size: 11px; font-weight: 600; }
+  .exp-date {
+    font-size: 10px; color: var(--yellow);
+    background: rgba(242,200,15,.08);
+    border: 1px solid rgba(242,200,15,.2);
+    padding: 2px 8px; border-radius: 2px;
+  }
+  .exp-bullets { list-style: none; }
+  .exp-bullets li {
+    font-size: 11.5px; color: var(--muted);
+    padding: 3px 0 3px 14px; position: relative;
+  }
+  .exp-bullets li::before {
+    content: '▸'; position: absolute; left: 0;
+    color: var(--blue); font-size: 10px; top: 4px;
+  }
 
-    /* ── MAIN CONTENT ───────────────────────────────── */
-    .page {
-      position: relative;
-      z-index: 10;
-      max-width: 860px;
-      margin: 0 auto;
-      padding: 80px 24px 48px;
-    }
+  /* ── SKILL BARS ── */
+  .skill-group { margin-bottom: 20px; }
+  .skill-group:last-child { margin-bottom: 0; }
+  .skill-group-label {
+    font-size: 9.5px; color: var(--muted);
+    text-transform: uppercase; letter-spacing: .1em;
+    border-left: 2px solid var(--purple);
+    padding-left: 8px; margin-bottom: 12px;
+  }
+  .skill-row { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+  .skill-name { font-size: 11.5px; color: var(--text); width: 110px; flex-shrink: 0; }
+  .skill-track {
+    flex: 1; height: 5px;
+    background: rgba(255,255,255,.06);
+    border-radius: 3px; overflow: hidden;
+  }
+  .skill-fill {
+    height: 100%; border-radius: 3px;
+    animation: growBar 1s ease .6s both;
+    transform-origin: left;
+  }
+  .skill-fill.t { background: linear-gradient(90deg, var(--teal), rgba(1,184,170,.4)); }
+  .skill-fill.b { background: linear-gradient(90deg, var(--blue), rgba(17,141,255,.4)); }
+  .skill-fill.y { background: linear-gradient(90deg, var(--yellow), rgba(242,200,15,.4)); }
+  .skill-fill.o { background: linear-gradient(90deg, var(--orange), rgba(253,123,84,.4)); }
+  .skill-fill.p { background: linear-gradient(90deg, var(--purple), rgba(139,92,246,.4)); }
+  .skill-pct { font-size: 10px; color: var(--muted); width: 30px; text-align: right; flex-shrink: 0; }
 
-    /* ── HERO ───────────────────────────────────────── */
-    .hero {
-      margin-bottom: 48px;
-      border: 2px solid var(--alert);
-      padding: 32px;
-      position: relative;
-      background: rgba(0,0,0,0.55);
-    }
-    .hero::before {
-      content: 'CLASSIFIED';
-      position: absolute;
-      top: 22px; right: 22px;
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 22px;
-      color: var(--danger);
-      border: 3px solid var(--danger);
-      padding: 4px 10px;
-      transform: rotate(-8deg);
-      opacity: 0.75;
-      letter-spacing: 0.08em;
-      text-shadow: 0 0 12px rgba(180,20,20,0.5);
-    }
+  /* ── TECH TAGS ── */
+  .tech-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .tag {
+    font-size: 10.5px; padding: 4px 10px;
+    border-radius: 2px; border: 1px solid;
+  }
+  .tag.t { color: var(--teal);   border-color: rgba(1,184,170,.35);   background: rgba(1,184,170,.07); }
+  .tag.b { color: var(--blue);   border-color: rgba(17,141,255,.35);  background: rgba(17,141,255,.07); }
+  .tag.y { color: var(--yellow); border-color: rgba(242,200,15,.35);  background: rgba(242,200,15,.07); }
+  .tag.o { color: var(--orange); border-color: rgba(253,123,84,.35);  background: rgba(253,123,84,.07); }
+  .tag.p { color: var(--purple); border-color: rgba(139,92,246,.35);  background: rgba(139,92,246,.07); }
 
-    .case-tag {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 10px;
-      color: var(--faded);
-      letter-spacing: 0.2em;
-      margin-bottom: 10px;
-    }
+  /* ── FOOTER ── */
+  .footer {
+    margin-top: 20px; font-size: 10px;
+    color: rgba(136,146,164,.35);
+    text-align: center;
+    opacity: 0;
+    animation: fadeUp .4s ease .65s forwards;
+  }
+  .footer .kw { color: rgba(17,141,255,.35); }
 
-    .hero h1 {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: clamp(2.4rem, 7vw, 4.2rem);
-      color: var(--paper);
-      letter-spacing: 0.04em;
-      line-height: 1;
-      text-shadow: 3px 3px 0 #000, 0 0 30px rgba(212,98,10,0.35);
-      margin-bottom: 8px;
-    }
-
-    .hero-designation {
-      font-family: 'Oswald', sans-serif;
-      font-weight: 600;
-      font-size: 1.15rem;
-      color: var(--alert);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-      margin-bottom: 20px;
-    }
-
-    .hero-stats {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 24px;
-      margin-top: 20px;
-    }
-    .stat-block {
-      text-align: center;
-    }
-    .stat-block .stat-num {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 2rem;
-      color: var(--muzzle);
-      display: block;
-      text-shadow: 0 0 16px rgba(240,160,48,0.5);
-    }
-    .stat-block .stat-label {
-      font-size: 9px;
-      color: var(--faded);
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-    }
-
-    .hero-location {
-      margin-top: 14px;
-      font-size: 0.85rem;
-      color: var(--faded);
-      letter-spacing: 0.1em;
-    }
-    .hero-location::before { content: '▸ LOCATION: '; color: var(--alert); }
-
-    /* ── SECTION HEADERS ────────────────────────────── */
-    .section-head {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      margin-bottom: 20px;
-      margin-top: 44px;
-    }
-    .section-head::before {
-      content: '';
-      flex: 0 0 4px;
-      height: 28px;
-      background: var(--alert);
-      display: block;
-    }
-    .section-head h2 {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 1.1rem;
-      color: var(--paper);
-      letter-spacing: 0.18em;
-      text-transform: uppercase;
-    }
-    .section-head::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: linear-gradient(to right, var(--alert), transparent);
-      opacity: 0.4;
-    }
-
-    /* ── INTEL BRIEFING ─────────────────────────────── */
-    .briefing {
-      background: rgba(0,0,0,0.5);
-      border-left: 3px solid var(--alert);
-      border-bottom: 1px solid rgba(212,98,10,0.3);
-      padding: 20px 24px;
-      font-size: 0.95rem;
-      color: var(--chalk);
-      line-height: 1.75;
-      position: relative;
-    }
-    .briefing::before {
-      content: 'INTEL BRIEFING // EYES ONLY';
-      display: block;
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 9px;
-      color: var(--alert);
-      letter-spacing: 0.18em;
-      margin-bottom: 10px;
-    }
-    .briefing-stamp {
-      position: absolute;
-      bottom: 12px; right: 16px;
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 18px;
-      color: var(--blood);
-      border: 2px solid var(--blood);
-      padding: 3px 8px;
-      transform: rotate(6deg);
-      opacity: 0.6;
-      letter-spacing: 0.06em;
-    }
-
-    /* ── DEPLOYMENTS / EXPERIENCE ───────────────────── */
-    .deployment {
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(212,98,10,0.25);
-      border-left: 3px solid var(--stencil);
-      padding: 22px 24px;
-      margin-bottom: 16px;
-      position: relative;
-    }
-    .deployment.current {
-      border-left-color: var(--muzzle);
-    }
-    .deployment-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .deployment-title {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 1rem;
-      color: var(--paper);
-      letter-spacing: 0.06em;
-    }
-    .deployment-org {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.85rem;
-      color: var(--alert);
-      letter-spacing: 0.1em;
-      margin-top: 2px;
-    }
-    .deployment-dates {
-      font-size: 0.78rem;
-      color: var(--faded);
-      font-family: 'Oswald', sans-serif;
-      letter-spacing: 0.1em;
-      text-align: right;
-    }
-    .badge-active {
-      display: inline-block;
-      background: var(--muzzle);
-      color: #000;
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 9px;
-      padding: 2px 7px;
-      letter-spacing: 0.1em;
-      margin-top: 4px;
-    }
-    .deployment ul {
-      list-style: none;
-      margin-top: 10px;
-    }
-    .deployment ul li {
-      font-size: 0.9rem;
-      color: var(--chalk);
-      padding: 3px 0 3px 20px;
-      position: relative;
-      line-height: 1.55;
-    }
-    .deployment ul li::before {
-      content: '▸';
-      position: absolute;
-      left: 0;
-      color: var(--alert);
-    }
-
-    /* ── CAPABILITIES / PERKS GRID ──────────────────── */
-    .perks-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-      gap: 12px;
-    }
-    .perk {
-      background: rgba(0,0,0,0.6);
-      border: 1px solid rgba(212,98,10,0.3);
-      padding: 14px 16px;
-      position: relative;
-      transition: border-color 0.2s, background 0.2s;
-    }
-    .perk:hover {
-      border-color: var(--muzzle);
-      background: rgba(30,20,8,0.8);
-    }
-    .perk-icon {
-      font-size: 1.5rem;
-      display: block;
-      margin-bottom: 6px;
-      filter: sepia(1) saturate(0.6);
-    }
-    .perk-name {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 0.72rem;
-      color: var(--paper);
-      letter-spacing: 0.08em;
-      display: block;
-      margin-bottom: 4px;
-    }
-    .perk-level {
-      display: flex;
-      gap: 3px;
-      margin-top: 6px;
-    }
-    .perk-pip {
-      width: 14px;
-      height: 4px;
-      background: var(--dark-olive);
-      border: 1px solid rgba(212,98,10,0.4);
-    }
-    .perk-pip.filled { background: var(--alert); border-color: var(--muzzle); }
-
-    /* ── EXFIL / CONTACT ────────────────────────────── */
-    .exfil-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 12px;
-    }
-    .exfil-item {
-      background: rgba(0,0,0,0.55);
-      border: 1px solid rgba(212,98,10,0.3);
-      padding: 16px 20px;
-      cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-      text-decoration: none;
-      display: block;
-    }
-    .exfil-item:hover {
-      background: rgba(212,98,10,0.12);
-      border-color: var(--muzzle);
-    }
-    .exfil-key {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 1.4rem;
-      color: var(--muzzle);
-      display: block;
-      margin-bottom: 4px;
-    }
-    .exfil-label {
-      font-family: 'Oswald', sans-serif;
-      font-size: 0.75rem;
-      color: var(--alert);
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      display: block;
-    }
-    .exfil-value {
-      font-size: 0.82rem;
-      color: var(--faded);
-      margin-top: 2px;
-    }
-
-    /* ── ROUND COUNTER FOOTER ───────────────────────── */
-    .round-footer {
-      margin-top: 60px;
-      padding: 20px 0;
-      text-align: center;
-      border-top: 1px solid rgba(212,98,10,0.2);
-    }
-    .round-display {
-      font-family: 'Black Ops One', sans-serif;
-      font-size: 0.9rem;
-      color: var(--faded);
-      letter-spacing: 0.22em;
-    }
-    .round-display span {
-      color: var(--muzzle);
-      font-size: 1.3rem;
-    }
-    .round-tagline {
-      font-size: 0.78rem;
-      color: var(--blood);
-      margin-top: 6px;
-      letter-spacing: 0.12em;
-    }
-
-    /* ── UTILITIES ──────────────────────────────────── */
-    .caution-stripe { margin: 32px 0 0; }
-
-    @media (max-width: 600px) {
-      .hero { padding: 22px 16px; }
-      .page { padding: 72px 14px 40px; }
-      .hero h1 { font-size: 2.2rem; }
-    }
-  </style>
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes growBar {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
+  }
+</style>
 </head>
 <body>
+<div class="page">
 
-<canvas id="bg"></canvas>
-<div class="vignette"></div>
-<div class="film-grain"></div>
-<div class="ground-fog">
-  <div class="fog-layer"></div>
-  <div class="fog-layer"></div>
-  <div class="fog-layer"></div>
-  <div class="fog-fade"></div>
-</div>
-
-<!-- HUD BAR -->
-<div class="hud-bar">
-  <span class="hud-left">ROUND: ∞</span>
-  <span class="hud-mid">⚠ CLASSIFIED TRANSMISSION ⚠</span>
-  <span class="hud-right">DOSSIER: TERRY-115</span>
-</div>
-
-<main class="page">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="dot" style="background:var(--yellow)"></div>
+    <div class="dot" style="background:var(--orange)"></div>
+    <div class="dot" style="background:var(--teal)"></div>
+    <span class="topbar-label">rhys_terry.report · Power BI CV Dashboard</span>
+    <span class="live-badge">● LIVE</span>
+  </div>
 
   <!-- HERO -->
-  <section class="hero">
-    <div class="case-tag">CASE FILE // 115-TERRY // NORTHERN DIVISION</div>
-    <h1>TERRY, RHYS</h1>
-    <div class="hero-designation">Solution Support Specialist</div>
-
-    <div class="hero-stats">
-      <div class="stat-block">
-        <span class="stat-num">3+</span>
-        <span class="stat-label">Years Active</span>
-      </div>
-      <div class="stat-block">
-        <span class="stat-num">∞</span>
-        <span class="stat-label">Tickets Closed</span>
-      </div>
-      <div class="stat-block">
-        <span class="stat-num">115</span>
-        <span class="stat-label">Insights Extracted</span>
-      </div>
+  <div class="hero">
+    <div class="hero-sql">
+      <span class="kw">SELECT</span> <span class="col">full_name</span>, <span class="col">role</span>, <span class="col">location</span><br>
+      <span class="kw">FROM</span> <span class="tbl">candidates</span><br>
+      <span class="kw">WHERE</span> <span class="col">id</span> = <span class="val">'rhys_terry'</span>
+      <span class="kw">AND</span> <span class="col">available</span> = <span class="val">TRUE</span>
     </div>
-
-    <div class="hero-location">Manchester, UK</div>
-  </section>
-
-  <!-- INTEL BRIEFING -->
-  <div class="section-head"><h2>Intel Briefing</h2></div>
-  <div class="briefing">
-    <p>
-      Asset TERRY has demonstrated consistent operational value as a front-line Solution Support Specialist.
-      Specialises in extracting actionable intelligence from Service Desk data pipelines, deploying
-      Power BI to transform raw incident logs into strategic insights. Effective under pressure,
-      capable of holding the line on SLAs while simultaneously identifying systemic weaknesses in
-      support operations. A force multiplier in any data-driven support environment.
-    </p>
-    <div class="briefing-stamp">VERIFIED</div>
-  </div>
-
-  <!-- DEPLOYMENTS -->
-  <div class="section-head"><h2>Field Deployments</h2></div>
-
-  <div class="deployment current">
-    <div class="deployment-meta">
-      <div>
-        <div class="deployment-title">Solution Support Specialist</div>
-        <div class="deployment-org">[Current Organisation] — Manchester, UK</div>
+    <div class="hero-name">Rhys Terry</div>
+    <div class="hero-role">Senior Data Engineer &amp; BI Developer</div>
+    <div class="contacts">
+      <div class="contact-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+        <a href="mailto:rhys@example.com">rhys@example.com</a>
       </div>
-      <div class="deployment-dates">
-        20XX — PRESENT<br>
-        <span class="badge-active">● ACTIVE</span>
+      <div class="contact-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91A16 16 0 0 0 12 15.91l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+        +44 7700 000000
       </div>
-    </div>
-    <ul>
-      <li>Design and maintain Power BI dashboards drawing on live Service Desk data to surface recurring incident patterns and capacity trends</li>
-      <li>Provide targeted insights to team leads, translating volume and resolution-time data into actionable recommendations</li>
-      <li>Manage escalations across support tiers, ensuring SLA compliance and clear communication with stakeholders</li>
-      <li>Build and refine reporting processes that reduce time-to-insight and improve operational decision-making</li>
-    </ul>
-  </div>
-
-  <div class="deployment">
-    <div class="deployment-meta">
-      <div>
-        <div class="deployment-title">IT Support Analyst</div>
-        <div class="deployment-org">[Previous Organisation] — Manchester, UK</div>
+      <div class="contact-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
+        <a href="#">linkedin.com/in/rhysterry</a>
       </div>
-      <div class="deployment-dates">20XX — 20XX</div>
-    </div>
-    <ul>
-      <li>Delivered first and second-line technical support across hardware, software and network issues</li>
-      <li>Logged, triaged and prioritised incidents within the Service Desk platform in line with SLA targets</li>
-      <li>Contributed to knowledge base documentation to reduce repeat contacts and improve self-service resolution</li>
-    </ul>
-  </div>
-
-  <div class="deployment">
-    <div class="deployment-meta">
-      <div>
-        <div class="deployment-title">Service Desk Technician</div>
-        <div class="deployment-org">[First Post] — Greater Manchester</div>
-      </div>
-      <div class="deployment-dates">20XX — 20XX</div>
-    </div>
-    <ul>
-      <li>Handled inbound support requests via phone, email and ticketing system, resolving common incidents to first-contact resolution where possible</li>
-      <li>Maintained accurate records of all interactions and resolutions within the ITSM platform</li>
-    </ul>
-  </div>
-
-  <!-- CAPABILITIES -->
-  <div class="section-head"><h2>Capabilities &amp; Loadout</h2></div>
-  <div class="perks-grid">
-    <div class="perk">
-      <span class="perk-icon">📊</span>
-      <span class="perk-name">Power BI</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">🎫</span>
-      <span class="perk-name">Service Desk Operations</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">🔍</span>
-      <span class="perk-name">Data Analysis</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">📋</span>
-      <span class="perk-name">Incident Management</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">⏱</span>
-      <span class="perk-name">SLA Management</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">📈</span>
-      <span class="perk-name">Insight Generation</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">🗂</span>
-      <span class="perk-name">Documentation</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip"></div>
-        <div class="perk-pip"></div>
-      </div>
-    </div>
-    <div class="perk">
-      <span class="perk-icon">🤝</span>
-      <span class="perk-name">Stakeholder Comms</span>
-      <div class="perk-level">
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip filled"></div>
-        <div class="perk-pip"></div>
+      <div class="contact-item">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8892a4" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+        Manchester, UK
       </div>
     </div>
   </div>
 
-  <!-- EXFIL / CONTACT -->
-  <div class="section-head"><h2>Exfil Coordinates</h2></div>
-  <div class="exfil-grid">
-    <a href="mailto:rhys@example.com" class="exfil-item">
-      <span class="exfil-key">[E]</span>
-      <span class="exfil-label">Email Transmission</span>
-      <div class="exfil-value">rhys@example.com</div>
-    </a>
-    <a href="https://linkedin.com/in/rhys-terry" target="_blank" class="exfil-item">
-      <span class="exfil-key">[L]</span>
-      <span class="exfil-label">LinkedIn Intel</span>
-      <div class="exfil-value">linkedin.com/in/rhys-terry</div>
-    </a>
-    <a href="./Rhys-Terry-CV.pdf" download class="exfil-item">
-      <span class="exfil-key">[D]</span>
-      <span class="exfil-label">Download Dossier</span>
-      <div class="exfil-value">Rhys-Terry-CV.pdf</div>
-    </a>
+  <!-- KPI STRIP -->
+  <div class="kpi-strip">
+    <div class="kpi y">
+      <div class="kpi-label">COUNT(years_experience)</div>
+      <div class="kpi-val">6+</div>
+      <div class="kpi-sub">Years in Data &amp; BI</div>
+    </div>
+    <div class="kpi t">
+      <div class="kpi-label">COUNT(DISTINCT tools)</div>
+      <div class="kpi-val">12</div>
+      <div class="kpi-sub">Technologies mastered</div>
+    </div>
+    <div class="kpi o">
+      <div class="kpi-label">SUM(dashboards_built)</div>
+      <div class="kpi-val">80+</div>
+      <div class="kpi-sub">Reports delivered</div>
+    </div>
+    <div class="kpi b">
+      <div class="kpi-label">AVG(stakeholder_rating)</div>
+      <div class="kpi-val">9.4</div>
+      <div class="kpi-sub">Out of 10</div>
+    </div>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="section-card">
+    <div class="sec-header">
+      <div class="sec-icon" style="background:var(--teal)"></div>
+      <div class="sec-sql">
+        <span class="kw">SELECT</span> <span class="col">role</span>, <span class="col">company</span>, <span class="col">impact</span>
+        <span class="kw">FROM</span> <span class="tbl">work_experience</span>
+        <span class="kw">ORDER BY</span> <span class="col">start_date</span> <span class="kw">DESC</span>
+      </div>
+    </div>
+    <div class="sec-body">
+
+      <div class="exp-item">
+        <div class="exp-title">Senior BI Developer</div>
+        <div class="exp-meta">
+          <span class="exp-company">Acme Analytics Ltd · Manchester</span>
+          <span class="exp-date">2022 — Present</span>
+        </div>
+        <ul class="exp-bullets">
+          <li>Architected end-to-end Power BI solutions serving 200+ users across 5 business units</li>
+          <li>Reduced monthly report generation time by 70% via automated Azure Data Factory pipelines</li>
+          <li>Led migration of legacy SSRS reports to modern Power BI Premium workspace</li>
+          <li>Designed star-schema data models in Azure Synapse, optimising query performance by 3×</li>
+        </ul>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-title">Data Engineer</div>
+        <div class="exp-meta">
+          <span class="exp-company">DataBridge Solutions · Leeds</span>
+          <span class="exp-date">2020 — 2022</span>
+        </div>
+        <ul class="exp-bullets">
+          <li>Built and maintained ETL pipelines processing 50M+ daily records with Databricks &amp; PySpark</li>
+          <li>Owned the company's central SQL data warehouse on Azure SQL Database</li>
+          <li>Operationalised ML model outputs into production BI dashboards</li>
+        </ul>
+      </div>
+
+      <div class="exp-item">
+        <div class="exp-title">Business Intelligence Analyst</div>
+        <div class="exp-meta">
+          <span class="exp-company">Northgate Retail Group · Manchester</span>
+          <span class="exp-date">2018 — 2020</span>
+        </div>
+        <ul class="exp-bullets">
+          <li>Created self-service Power BI dashboards tracking KPIs across sales, inventory and logistics</li>
+          <li>Wrote complex T-SQL queries and stored procedures for all reporting requirements</li>
+          <li>Trained 30+ non-technical staff on Power BI consumption and basic data analysis</li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- SKILL BARS -->
+  <div class="section-card">
+    <div class="sec-header">
+      <div class="sec-icon" style="background:var(--yellow)"></div>
+      <div class="sec-sql">
+        <span class="kw">SELECT</span> <span class="col">skill</span>, <span class="fn">proficiency</span>(<span class="col">*</span>)
+        <span class="kw">FROM</span> <span class="tbl">core_skills</span>
+        <span class="kw">GROUP BY</span> <span class="col">category</span>
+      </div>
+    </div>
+    <div class="sec-body">
+
+      <div class="skill-group">
+        <div class="skill-group-label">-- BI &amp; Visualisation</div>
+        <div class="skill-row"><span class="skill-name">Power BI</span><div class="skill-track"><div class="skill-fill t" style="width:96%"></div></div><span class="skill-pct">96%</span></div>
+        <div class="skill-row"><span class="skill-name">DAX</span><div class="skill-track"><div class="skill-fill t" style="width:90%"></div></div><span class="skill-pct">90%</span></div>
+        <div class="skill-row"><span class="skill-name">Power Query</span><div class="skill-track"><div class="skill-fill t" style="width:88%"></div></div><span class="skill-pct">88%</span></div>
+        <div class="skill-row"><span class="skill-name">Tableau</span><div class="skill-track"><div class="skill-fill t" style="width:72%"></div></div><span class="skill-pct">72%</span></div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">-- Data &amp; SQL</div>
+        <div class="skill-row"><span class="skill-name">T-SQL / SQL</span><div class="skill-track"><div class="skill-fill y" style="width:95%"></div></div><span class="skill-pct">95%</span></div>
+        <div class="skill-row"><span class="skill-name">PySpark</span><div class="skill-track"><div class="skill-fill y" style="width:80%"></div></div><span class="skill-pct">80%</span></div>
+        <div class="skill-row"><span class="skill-name">Python</span><div class="skill-track"><div class="skill-fill y" style="width:78%"></div></div><span class="skill-pct">78%</span></div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">-- Azure Platform</div>
+        <div class="skill-row"><span class="skill-name">Data Factory</span><div class="skill-track"><div class="skill-fill b" style="width:88%"></div></div><span class="skill-pct">88%</span></div>
+        <div class="skill-row"><span class="skill-name">Synapse</span><div class="skill-track"><div class="skill-fill b" style="width:82%"></div></div><span class="skill-pct">82%</span></div>
+        <div class="skill-row"><span class="skill-name">Databricks</span><div class="skill-track"><div class="skill-fill b" style="width:79%"></div></div><span class="skill-pct">79%</span></div>
+        <div class="skill-row"><span class="skill-name">Fabric</span><div class="skill-track"><div class="skill-fill b" style="width:68%"></div></div><span class="skill-pct">68%</span></div>
+      </div>
+
+      <div class="skill-group">
+        <div class="skill-group-label">-- Dev &amp; Workflow</div>
+        <div class="skill-row"><span class="skill-name">DAX Studio</span><div class="skill-track"><div class="skill-fill p" style="width:86%"></div></div><span class="skill-pct">86%</span></div>
+        <div class="skill-row"><span class="skill-name">Git / DevOps</span><div class="skill-track"><div class="skill-fill p" style="width:84%"></div></div><span class="skill-pct">84%</span></div>
+        <div class="skill-row"><span class="skill-name">Tabular Editor</span><div class="skill-track"><div class="skill-fill p" style="width:80%"></div></div><span class="skill-pct">80%</span></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section-card">
+    <div class="sec-header">
+      <div class="sec-icon" style="background:var(--orange)"></div>
+      <div class="sec-sql">
+        <span class="kw">SELECT</span> <span class="col">tool</span>
+        <span class="kw">FROM</span> <span class="tbl">tech_stack</span>
+        <span class="kw">WHERE</span> <span class="col">proficient</span> = <span class="val">TRUE</span>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="tech-tags">
+        <span class="tag t">Power BI</span>
+        <span class="tag t">DAX Studio</span>
+        <span class="tag t">Tabular Editor</span>
+        <span class="tag y">T-SQL</span>
+        <span class="tag y">Python</span>
+        <span class="tag y">PySpark</span>
+        <span class="tag b">Azure</span>
+        <span class="tag b">Databricks</span>
+        <span class="tag b">Synapse</span>
+        <span class="tag b">Data Factory</span>
+        <span class="tag o">Fabric</span>
+        <span class="tag o">Power Query</span>
+        <span class="tag p">Git</span>
+        <span class="tag p">Azure DevOps</span>
+        <span class="tag t">Tableau</span>
+      </div>
+    </div>
   </div>
 
   <!-- FOOTER -->
-  <div class="caution-stripe"></div>
-  <footer class="round-footer">
-    <div class="round-display">ROUND <span>∞</span> — STILL STANDING</div>
-    <div class="round-tagline">Semper Data. Semper Insight.</div>
-  </footer>
+  <div class="footer">
+    <span class="kw">COMMIT</span>; <span class="cmt">-- All records verified. Hire immediately.</span><br>
+    Last refreshed: April 2026
+  </div>
 
-</main>
-
-<script>
-// ── WaW ZOMBIES BACKGROUND ──────────────────────────────────────
-(function () {
-  const canvas = document.getElementById('bg');
-  const ctx    = canvas.getContext('2d');
-
-  // Flickering bulb state
-  let flkBase = 0.7, flkTarget = 0.7, flkTimer = 0;
-
-  // Static scene elements (rebuilt on resize)
-  let bricks = [], cracks = [], chalk = [];
-
-  // Seeded-ish random so marks don't jump on every frame
-  let rng = (n) => { let x = Math.sin(n * 9301 + 49297) * 233280; return x - Math.floor(x); };
-
-  function resize() {
-    canvas.width  = window.innerWidth;
-    canvas.height = window.innerHeight;
-    buildScene();
-  }
-
-  function buildScene() {
-    bricks = []; cracks = []; chalk = [];
-    const W = canvas.width, H = canvas.height;
-    const BH = 30, BW = 64;
-
-    // Individual brick rectangles with slight colour variation
-    for (let row = 0; row * BH < H + BH; row++) {
-      const offset = (row % 2) * (BW / 2);
-      for (let col = -1; col * BW < W + BW; col++) {
-        const x = col * BW + offset;
-        const y = row * BH;
-        const seed = row * 200 + col;
-        const lightness = 12 + rng(seed) * 8;   // subtle variation
-        bricks.push({ x, y, w: BW - 2, h: BH - 2, l: lightness });
-      }
-    }
-
-    // Cracks — jagged multi-segment lines
-    for (let i = 0; i < 8; i++) {
-      const seg = [];
-      let cx = W * rng(i * 3)
-      let cy = H * (0.1 + rng(i * 3 + 1) * 0.8);
-      seg.push([cx, cy]);
-      const segs = 3 + Math.floor(rng(i * 3 + 2) * 5);
-      for (let s = 0; s < segs; s++) {
-        cx += (rng(i * 10 + s) - 0.4) * 40;
-        cy += (rng(i * 10 + s + 1) - 0.2) * 30;
-        seg.push([cx, cy]);
-      }
-      cracks.push({ seg, alpha: 0.08 + rng(i) * 0.1 });
-    }
-
-    // Chalk drawings
-    const texts = ['115', 'HELP', 'ROUND 1', 'DER RIESE', 'NACHT', '⚠ DANGER'];
-    for (let i = 0; i < 5; i++) {
-      chalk.push({
-        type: 'text',
-        str:  texts[i % texts.length],
-        x: W * (0.05 + rng(i * 7) * 0.88),
-        y: H * (0.1  + rng(i * 7 + 1) * 0.78),
-        rot: (rng(i * 7 + 2) - 0.5) * 0.35,
-        alpha: 0.04 + rng(i * 7 + 3) * 0.06,
-        sz: 14 + Math.floor(rng(i * 7 + 4) * 24),
-      });
-    }
-
-    // Chalk zombie silhouettes
-    for (let i = 0; i < 4; i++) {
-      chalk.push({
-        type: 'zombie',
-        x: W * (0.08 + rng(i * 13) * 0.84),
-        y: H * (0.25 + rng(i * 13 + 1) * 0.55),
-        scale: 18 + rng(i * 13 + 2) * 22,
-        alpha: 0.04 + rng(i * 13 + 3) * 0.06,
-      });
-    }
-
-    // Tally marks (scratched into wall)
-    for (let i = 0; i < 3; i++) {
-      chalk.push({
-        type: 'tally',
-        x: W * (0.06 + rng(i * 17) * 0.85),
-        y: H * (0.15 + rng(i * 17 + 1) * 0.65),
-        count: 5 + Math.floor(rng(i * 17 + 2) * 20),
-        alpha: 0.06 + rng(i * 17 + 3) * 0.07,
-      });
-    }
-  }
-
-  function drawZombie(x, y, sz, alpha) {
-    ctx.save();
-    ctx.strokeStyle = `rgba(200,195,155,${alpha})`;
-    ctx.lineWidth = 1.5;
-    ctx.lineCap = 'round';
-    // Head
-    ctx.beginPath();
-    ctx.arc(x, y - sz, sz * 0.28, 0, Math.PI * 2);
-    ctx.stroke();
-    // Body
-    ctx.beginPath();
-    ctx.moveTo(x, y - sz * 0.7);
-    ctx.lineTo(x, y);
-    ctx.stroke();
-    // Arms outstretched (zombie reach)
-    ctx.beginPath();
-    ctx.moveTo(x - sz * 0.7, y - sz * 0.4);
-    ctx.lineTo(x + sz * 0.7, y - sz * 0.55);
-    ctx.stroke();
-    // Legs
-    ctx.beginPath();
-    ctx.moveTo(x, y);
-    ctx.lineTo(x - sz * 0.3, y + sz * 0.7);
-    ctx.moveTo(x, y);
-    ctx.lineTo(x + sz * 0.35, y + sz * 0.7);
-    ctx.stroke();
-    ctx.restore();
-  }
-
-  function drawTally(x, y, count, alpha) {
-    ctx.save();
-    ctx.strokeStyle = `rgba(200,195,155,${alpha})`;
-    ctx.lineWidth = 1.5;
-    ctx.lineCap = 'round';
-    for (let i = 0; i < count; i++) {
-      const grp = Math.floor(i / 5);
-      const pos = i % 5;
-      const gx = x + grp * 32;
-      if (pos < 4) {
-        ctx.beginPath();
-        ctx.moveTo(gx + pos * 6, y);
-        ctx.lineTo(gx + pos * 6, y + 22);
-        ctx.stroke();
-      } else {
-        // diagonal strike-through
-        ctx.beginPath();
-        ctx.moveTo(gx - 3, y + 22);
-        ctx.lineTo(gx + 22, y);
-        ctx.stroke();
-      }
-    }
-    ctx.restore();
-  }
-
-  function draw(t) {
-    const W = canvas.width, H = canvas.height;
-    ctx.clearRect(0, 0, W, H);
-
-    // ── Base dark concrete ──────────────────────────────────────
-    ctx.fillStyle = '#090906';
-    ctx.fillRect(0, 0, W, H);
-
-    // ── Individual bricks ───────────────────────────────────────
-    for (const b of bricks) {
-      ctx.fillStyle = `rgb(${b.l},${b.l - 2},${Math.floor(b.l * 0.55)})`;
-      ctx.fillRect(b.x, b.y, b.w, b.h);
-    }
-
-    // Mortar / grout shadow — thin dark lines at full rows
-    ctx.strokeStyle = 'rgba(4,4,2,0.9)';
-    ctx.lineWidth = 2;
-    const BH = 30, BW = 64;
-    for (let row = 0; row * BH < H + BH; row++) {
-      const y = row * BH;
-      ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
-      const offset = (row % 2) * (BW / 2);
-      for (let x = offset - BW; x < W + BW; x += BW) {
-        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y + BH); ctx.stroke();
-      }
-    }
-
-    // ── Cracks ──────────────────────────────────────────────────
-    for (const c of cracks) {
-      ctx.strokeStyle = `rgba(3,3,2,${c.alpha})`;
-      ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(c.seg[0][0], c.seg[0][1]);
-      for (const [px, py] of c.seg.slice(1)) ctx.lineTo(px, py);
-      ctx.stroke();
-    }
-
-    // ── Chalk art ───────────────────────────────────────────────
-    for (const m of chalk) {
-      if (m.type === 'text') {
-        ctx.save();
-        ctx.translate(m.x, m.y);
-        ctx.rotate(m.rot);
-        ctx.fillStyle = `rgba(215,205,165,${m.alpha})`;
-        ctx.font = `bold ${m.sz}px 'Black Ops One', sans-serif`;
-        ctx.fillText(m.str, 0, 0);
-        ctx.restore();
-      } else if (m.type === 'zombie') {
-        drawZombie(m.x, m.y, m.scale, m.alpha);
-      } else if (m.type === 'tally') {
-        drawTally(m.x, m.y, m.count, m.alpha);
-      }
-    }
-
-    // ── Flicker logic ───────────────────────────────────────────
-    flkTimer -= 16;
-    if (flkTimer <= 0) {
-      if (Math.random() < 0.06) {
-        flkTarget = 0.05 + Math.random() * 0.15; // blackout
-        flkTimer  = 60  + Math.random() * 120;
-      } else {
-        flkTarget = 0.5 + Math.random() * 0.45;
-        flkTimer  = 80  + Math.random() * 350;
-      }
-    }
-    flkBase += (flkTarget - flkBase) * 0.1;
-    const flk = Math.max(0, flkBase + Math.sin(t * 0.009) * 0.03);
-
-    // ── Hanging bulb + cone ─────────────────────────────────────
-    const bx = Math.floor(W * 0.5);
-    // Cord
-    ctx.strokeStyle = `rgba(80,70,40,${flk * 0.8 + 0.1})`;
-    ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(bx, 0); ctx.lineTo(bx, 28); ctx.stroke();
-    // Socket cap
-    ctx.fillStyle = `rgba(50,45,28,${flk * 0.7 + 0.2})`;
-    ctx.fillRect(bx - 5, 28, 10, 6);
-    // Bulb glow
-    const glowR = 8 + flk * 4;
-    const bulbG = ctx.createRadialGradient(bx, 38, 0, bx, 38, glowR);
-    bulbG.addColorStop(0,   `rgba(255,230,140,${flk})`);
-    bulbG.addColorStop(0.5, `rgba(220,180,80,${flk * 0.6})`);
-    bulbG.addColorStop(1,   'rgba(0,0,0,0)');
-    ctx.fillStyle = bulbG;
-    ctx.fillRect(bx - glowR, 38 - glowR, glowR * 2, glowR * 2);
-    // Glass bulb shape
-    ctx.fillStyle = `rgba(255,240,180,${flk * 0.9 + 0.05})`;
-    ctx.beginPath(); ctx.ellipse(bx, 40, 5, 7, 0, 0, Math.PI * 2); ctx.fill();
-
-    // ── Light cone radiating down from bulb ─────────────────────
-    const coneG = ctx.createRadialGradient(bx, 40, 0, bx, 40, Math.max(W, H) * 0.9);
-    coneG.addColorStop(0,    `rgba(200,165,80,${flk * 0.55})`);
-    coneG.addColorStop(0.12, `rgba(140,108,45,${flk * 0.28})`);
-    coneG.addColorStop(0.35, `rgba(70,52,18,${flk * 0.12})`);
-    coneG.addColorStop(1,    'rgba(0,0,0,0)');
-    ctx.fillStyle = coneG;
-    ctx.fillRect(0, 0, W, H);
-
-    // ── Dark corners / floor ────────────────────────────────────
-    const cornerG = ctx.createRadialGradient(W/2, H/2, H * 0.2, W/2, H/2, H * 0.9);
-    cornerG.addColorStop(0, 'rgba(0,0,0,0)');
-    cornerG.addColorStop(1, `rgba(0,0,0,${0.55 + (1 - flk) * 0.3})`);
-    ctx.fillStyle = cornerG;
-    ctx.fillRect(0, 0, W, H);
-
-    // Floor darkness
-    const floorG = ctx.createLinearGradient(0, H * 0.65, 0, H);
-    floorG.addColorStop(0, 'rgba(0,0,0,0)');
-    floorG.addColorStop(1, `rgba(4,3,1,${0.7 + (1 - flk) * 0.25})`);
-    ctx.fillStyle = floorG;
-    ctx.fillRect(0, H * 0.65, W, H * 0.35);
-
-    requestAnimationFrame(draw);
-  }
-
-  window.addEventListener('resize', resize);
-  resize();
-  requestAnimationFrame(draw);
-})();
-</script>
-
+</div>
 </body>
 </html>
