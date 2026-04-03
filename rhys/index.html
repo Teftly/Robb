@@ -29,7 +29,10 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 42px; /* offset for sticky nav */
+  }
 
   body {
     background: var(--bg);
@@ -49,7 +52,7 @@
   .page {
     max-width: 760px;
     margin: 0 auto;
-    padding: 0 16px 56px;
+    padding: 24px 16px 56px;
   }
 
   /* ── NAV ── */
@@ -59,7 +62,6 @@
     z-index: 100;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
   }
   .nav {
     max-width: 760px;
