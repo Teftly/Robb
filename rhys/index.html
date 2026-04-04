@@ -19,7 +19,6 @@
     --muted:   #9d9d9d;
     --subtle:  #6a6a6a;
 
-    /* VS Code default dark SQL token colours */
     --sql-kw:  #569cd6;
     --sql-col: #9cdcfe;
     --sql-val: #ce9178;
@@ -29,7 +28,7 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 42px; }
 
   body {
     background: var(--bg);
@@ -40,7 +39,6 @@
     min-height: 100vh;
   }
 
-  /* ── SCROLLBAR ── */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--bg); }
   ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
@@ -49,7 +47,7 @@
   .page {
     max-width: 760px;
     margin: 0 auto;
-    padding: 0 16px 56px;
+    padding: 24px 16px 56px;
   }
 
   /* ── NAV ── */
@@ -59,7 +57,6 @@
     z-index: 100;
     background: var(--surface);
     border-bottom: 1px solid var(--border);
-    margin-bottom: 24px;
   }
   .nav {
     max-width: 760px;
@@ -81,14 +78,11 @@
     flex-shrink: 0;
     letter-spacing: .04em;
   }
-  .nav-tabs {
-    display: flex;
-    align-items: stretch;
-  }
+  .nav-tabs { display: flex; align-items: stretch; }
   .nav-tab {
     display: flex;
     align-items: center;
-    padding: 0 14px;
+    padding: 0 13px;
     font-size: 11px;
     font-weight: 500;
     color: var(--muted);
@@ -98,10 +92,7 @@
     white-space: nowrap;
   }
   .nav-tab:hover { color: var(--text); }
-  .nav-tab.active {
-    color: var(--text);
-    border-bottom-color: var(--blue);
-  }
+  .nav-tab.active { color: var(--text); border-bottom-color: var(--blue); }
   .nav-spacer { flex: 1; }
   .nav-loc {
     display: flex;
@@ -114,7 +105,6 @@
     padding-left: 16px;
     margin-left: 4px;
   }
-  .nav-loc-arrow { color: var(--border); }
   #nav-current { color: var(--blue); font-weight: 600; }
 
   /* ── TOPBAR ── */
@@ -123,7 +113,6 @@
     align-items: center;
     gap: 8px;
     margin-bottom: 18px;
-    padding-top: 4px;
     opacity: 0;
     animation: fadeUp .35s ease forwards;
   }
@@ -141,13 +130,9 @@
     letter-spacing: .06em; flex-shrink: 0;
   }
 
-  /* ── SQL BLOCKS (line numbers) ── */
+  /* ── SQL BLOCKS ── */
   .sql-block { font-size: 11px; }
-  .sql-line {
-    display: flex;
-    align-items: baseline;
-    line-height: 1.95;
-  }
+  .sql-line { display: flex; align-items: baseline; line-height: 1.95; }
   .ln {
     min-width: 18px;
     color: var(--subtle);
@@ -198,13 +183,17 @@
     font-weight: 700;
     letter-spacing: -.02em;
     line-height: 1.1;
-    margin-bottom: 5px;
+    margin-bottom: 4px;
     color: var(--text);
   }
   .hero-role {
     font-size: 11px; color: var(--teal);
     font-weight: 500; letter-spacing: .05em;
-    margin-bottom: 20px;
+    margin-bottom: 8px;
+  }
+  .hero-summary {
+    font-size: 10.5px; color: var(--muted);
+    line-height: 1.65; margin-bottom: 18px;
   }
   .contacts { display: flex; flex-direction: column; gap: 9px; }
   .contact-item { display: flex; align-items: center; gap: 9px; font-size: 11px; color: var(--muted); }
@@ -254,6 +243,7 @@
   }
   .section-card:nth-of-type(1) { animation-delay: .21s; }
   .section-card:nth-of-type(2) { animation-delay: .28s; }
+  .section-card:nth-of-type(3) { animation-delay: .35s; }
 
   .sec-header {
     display: flex;
@@ -267,10 +257,7 @@
   .sec-body { padding: 20px 18px; }
 
   /* ── EXPERIENCE TIMELINE ── */
-  .timeline {
-    position: relative;
-    padding-left: 24px;
-  }
+  .timeline { position: relative; padding-left: 24px; }
   .timeline::before {
     content: '';
     position: absolute;
@@ -278,16 +265,12 @@
     width: 1px;
     background: linear-gradient(to bottom, var(--blue), var(--border) 85%, transparent);
   }
-  .exp-item {
-    position: relative;
-    padding-bottom: 24px;
-  }
+  .exp-item { position: relative; padding-bottom: 24px; }
   .exp-item:last-child { padding-bottom: 0; }
   .exp-item::before {
     content: '';
     position: absolute;
-    left: -24px;
-    top: 7px;
+    left: -24px; top: 7px;
     width: 9px; height: 9px;
     border-radius: 50%;
     background: var(--blue);
@@ -295,10 +278,11 @@
     box-shadow: 0 0 0 1px rgba(0,120,212,.4);
     transform: translateX(50%);
   }
-  .exp-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
-  .exp-meta  { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 11px; }
+  .exp-item.minor::before { background: var(--border); box-shadow: none; }
+  .exp-title   { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 5px; }
+  .exp-meta    { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 11px; }
   .exp-company { color: var(--teal); font-size: 11px; font-weight: 500; }
-  .exp-date {
+  .exp-date    {
     font-size: 10px; color: var(--muted);
     background: var(--surface); border: 1px solid var(--border);
     padding: 2px 8px; border-radius: 2px;
@@ -312,6 +296,30 @@
   .exp-bullets li::before {
     content: '▸'; position: absolute; left: 0;
     color: var(--blue); font-size: 10px; top: 4px;
+  }
+  .exp-note { font-size: 11px; color: var(--subtle); font-style: italic; }
+
+  /* ── EDUCATION ── */
+  .edu-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .edu-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    padding: 14px;
+  }
+  .edu-qual  { font-size: 12px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .edu-inst  { font-size: 11px; color: var(--teal); margin-bottom: 4px; }
+  .edu-meta  { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .edu-dates { font-size: 10px; color: var(--muted); }
+  .edu-grade {
+    font-size: 10px; color: var(--gold);
+    background: rgba(232,180,0,.08);
+    border: 1px solid rgba(232,180,0,.2);
+    padding: 1px 8px; border-radius: 2px;
   }
 
   /* ── COMPETENCIES ── */
@@ -352,7 +360,7 @@
     background: var(--card);
     line-height: 1.9;
     opacity: 0;
-    animation: fadeUp .35s ease .35s forwards;
+    animation: fadeUp .35s ease .42s forwards;
   }
 
   /* ── ANIMATIONS ── */
@@ -363,12 +371,13 @@
 
   /* ── RESPONSIVE ── */
   @media (max-width: 560px) {
-    .hero-grid       { grid-template-columns: 1fr; gap: 20px; }
-    .comp-grid       { grid-template-columns: 1fr; }
-    .kpi-strip       { grid-template-columns: repeat(2, 1fr); }
-    .nav-brand       { display: none; }
-    .nav-loc         { display: none; }
-    .nav-tab         { padding: 0 10px; font-size: 10px; }
+    .hero-grid  { grid-template-columns: 1fr; gap: 20px; }
+    .comp-grid  { grid-template-columns: 1fr; }
+    .edu-grid   { grid-template-columns: 1fr; }
+    .kpi-strip  { grid-template-columns: repeat(2, 1fr); }
+    .nav-brand  { display: none; }
+    .nav-loc    { display: none; }
+    .nav-tab    { padding: 0 10px; font-size: 10px; }
   }
 
   /* ── PRINT ── */
@@ -408,11 +417,12 @@
     <div class="nav-tabs">
       <a href="#profile"       class="nav-tab" data-label="Profile">Profile</a>
       <a href="#experience"    class="nav-tab" data-label="Experience">Experience</a>
+      <a href="#education"     class="nav-tab" data-label="Education">Education</a>
       <a href="#competencies"  class="nav-tab" data-label="Competencies">Competencies</a>
     </div>
     <div class="nav-spacer"></div>
     <div class="nav-loc">
-      <span class="nav-loc-arrow">§</span>
+      <span>§</span>
       <span id="nav-current">Profile</span>
     </div>
   </nav>
@@ -436,7 +446,7 @@
       <div class="sql-block">
         <div class="sql-line">
           <span class="ln">1</span>
-          <span class="lc"><span class="kw">SELECT</span> <span class="col">full_name</span>, <span class="col">role</span>, <span class="col">location</span></span>
+          <span class="lc"><span class="kw">SELECT</span> <span class="col">full_name</span>, <span class="col">role</span>, <span class="col">contact</span></span>
         </div>
         <div class="sql-line">
           <span class="ln">2</span>
@@ -444,7 +454,7 @@
         </div>
         <div class="sql-line">
           <span class="ln">3</span>
-          <span class="lc"><span class="kw">WHERE</span>  <span class="col">id</span> = <span class="val">'rhys_terry'</span></span>
+          <span class="lc"><span class="kw">WHERE</span>  <span class="col">name</span> = <span class="val">'rhys_terry'</span></span>
         </div>
         <div class="sql-line">
           <span class="ln">4</span>
@@ -454,23 +464,16 @@
 
       <div>
         <div class="hero-name">Rhys Terry</div>
-        <div class="hero-role">Senior Data Engineer &amp; BI Developer</div>
+        <div class="hero-role">Solution Support Analyst &amp; Data Analyst</div>
+        <div class="hero-summary">Detail-oriented data analyst with experience in BI development, ML modelling, and automated reporting pipelines across education and infrastructure sectors.</div>
         <div class="contacts">
           <div class="contact-item">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-            <a href="mailto:rhys@example.com">rhys@example.com</a>
+            <a href="mailto:rhys.terry123@gmail.com">rhys.terry123@gmail.com</a>
           </div>
           <div class="contact-item">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.15 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.06 1.18h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.09 8.91A16 16 0 0 0 12 15.91l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-            +44 7700 000000
-          </div>
-          <div class="contact-item">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg>
-            <a href="#">linkedin.com/in/rhysterry</a>
-          </div>
-          <div class="contact-item">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
-            Manchester, UK
+            <a href="tel:07496413554">07496 413554</a>
           </div>
         </div>
       </div>
@@ -482,23 +485,23 @@
   <div class="kpi-strip">
     <div class="kpi gold">
       <div class="kpi-label">COUNT(years_exp)</div>
-      <div class="kpi-val">6+</div>
-      <div class="kpi-sub">Years in Data &amp; BI</div>
+      <div class="kpi-val">3+</div>
+      <div class="kpi-sub">Years in data roles</div>
     </div>
     <div class="kpi teal">
-      <div class="kpi-label">COUNT(DISTINCT tools)</div>
-      <div class="kpi-val">12</div>
-      <div class="kpi-sub">Technologies mastered</div>
+      <div class="kpi-label">SUM(weekly_reports)</div>
+      <div class="kpi-val">14</div>
+      <div class="kpi-sub">Weekly reports at MJ Quinn</div>
     </div>
     <div class="kpi orange">
-      <div class="kpi-label">SUM(dashboards_built)</div>
-      <div class="kpi-val">80+</div>
-      <div class="kpi-sub">Reports delivered</div>
+      <div class="kpi-label">COUNT(DISTINCT languages)</div>
+      <div class="kpi-val">5+</div>
+      <div class="kpi-sub">Python, R, SQL, DAX, M</div>
     </div>
     <div class="kpi blue">
-      <div class="kpi-label">SUM(pipeline_records)</div>
-      <div class="kpi-val">50M+</div>
-      <div class="kpi-sub">Daily records processed</div>
+      <div class="kpi-label">SCOPE(departments)</div>
+      <div class="kpi-val">All</div>
+      <div class="kpi-sub">Reporting coverage at AQA</div>
     </div>
   </div>
 
@@ -525,43 +528,116 @@
       <div class="timeline">
 
         <div class="exp-item">
-          <div class="exp-title">Senior BI Developer</div>
+          <div class="exp-title">Solution Support Analyst</div>
           <div class="exp-meta">
-            <span class="exp-company">Acme Analytics Ltd · Manchester</span>
-            <span class="exp-date">2022 — Present</span>
+            <span class="exp-company">AQA Education</span>
+            <span class="exp-date">2024 — Present</span>
           </div>
           <ul class="exp-bullets">
-            <li>Architected end-to-end Power BI solutions serving 200+ users across 5 business units</li>
-            <li>Reduced monthly report generation time by 70% via automated Azure Data Factory pipelines</li>
-            <li>Led migration of legacy SSRS reports to modern Power BI Premium workspace</li>
-            <li>Designed star-schema data models in Azure Synapse, optimising query performance by 3×</li>
+            <li>Led installation of ServiceDesk Plus, acting as primary liaison between data teams, colleagues, and Zoho.</li>
+            <li>Implemented APIs to enable real-time reporting and live augmentation of operational data.</li>
+            <li>Built Power BI and Analytics Plus dashboards for all departments, enabling KPI tracking and measurement.</li>
+            <li>Deployed Python, R, and SQL to create and maintain data models measuring departmental efficiency against ITIL KPIs.</li>
+            <li>Built and deployed machine learning models with automated pipelines to train, test, compare, and manage outputs.</li>
+            <li>Spearheaded all Azure programming initiatives, enhancing data systems and operations.</li>
+            <li>Trained and managed apprenticeship employees across software and coding languages.</li>
           </ul>
         </div>
 
         <div class="exp-item">
-          <div class="exp-title">Data Engineer</div>
+          <div class="exp-title">Data Analyst</div>
           <div class="exp-meta">
-            <span class="exp-company">DataBridge Solutions · Leeds</span>
-            <span class="exp-date">2020 — 2022</span>
+            <span class="exp-company">MJ Quinn</span>
+            <span class="exp-date">2022 — 2024</span>
           </div>
           <ul class="exp-bullets">
-            <li>Built and maintained ETL pipelines processing 50M+ daily records with Databricks &amp; PySpark</li>
-            <li>Owned the company's central SQL data warehouse on Azure SQL Database</li>
-            <li>Operationalised ML model outputs into production BI dashboards</li>
+            <li>Increased weekly reporting output from 6 to 14 reports, directly improving nationwide operational efficiency.</li>
+            <li>Transformed idle data into actionable insights, driving companywide retraining initiatives.</li>
+            <li>Transitioned reporting from Excel to Power BI while maintaining compatibility with legacy systems.</li>
+            <li>Managed data warehouses and lakehouses within Microsoft Fabric.</li>
+            <li>Developed new Power BI outputs by analysing XML code and conceptualising large datasets for trend analysis.</li>
+            <li>Updated legacy code in reporting systems to meet contractual standards.</li>
           </ul>
         </div>
 
-        <div class="exp-item">
-          <div class="exp-title">Business Intelligence Analyst</div>
+        <div class="exp-item minor">
+          <div class="exp-title">Supervisor</div>
           <div class="exp-meta">
-            <span class="exp-company">Northgate Retail Group · Manchester</span>
-            <span class="exp-date">2018 — 2020</span>
+            <span class="exp-company">Zizzi</span>
+            <span class="exp-date">2021 — 2022</span>
           </div>
-          <ul class="exp-bullets">
-            <li>Created self-service Power BI dashboards tracking KPIs across sales, inventory and logistics</li>
-            <li>Wrote complex T-SQL queries and stored procedures for all reporting requirements</li>
-            <li>Trained 30+ non-technical staff on Power BI consumption and basic data analysis</li>
-          </ul>
+          <p class="exp-note">Team leadership, staff training and mentoring, customer communication and conflict resolution.</p>
+        </div>
+
+        <div class="exp-item minor">
+          <div class="exp-title">Support Worker</div>
+          <div class="exp-meta">
+            <span class="exp-company">Valley Support Services</span>
+            <span class="exp-date">2019 — 2021</span>
+          </div>
+          <p class="exp-note">Client relationship management, budget oversight, health and safety compliance.</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- EDUCATION -->
+  <div id="education" class="section-card">
+    <div class="sec-header">
+      <div class="sec-bar" style="background:var(--blue)"></div>
+      <div class="sql-block">
+        <div class="sql-line">
+          <span class="ln">1</span>
+          <span class="lc"><span class="kw">SELECT</span> <span class="col">qualification</span>, <span class="col">institution</span>, <span class="col">grade</span></span>
+        </div>
+        <div class="sql-line">
+          <span class="ln">2</span>
+          <span class="lc"><span class="kw">FROM</span>   <span class="tbl">education</span></span>
+        </div>
+        <div class="sql-line">
+          <span class="ln">3</span>
+          <span class="lc"><span class="kw">ORDER BY</span> <span class="col">graduation_year</span> <span class="kw">DESC</span></span>
+        </div>
+      </div>
+    </div>
+    <div class="sec-body">
+      <div class="edu-grid">
+
+        <div class="edu-item">
+          <div class="edu-qual">MSc Financial Technology</div>
+          <div class="edu-inst">University of Liverpool</div>
+          <div class="edu-meta">
+            <span class="edu-dates">2021 — 2022</span>
+            <span class="edu-grade">Merit</span>
+          </div>
+        </div>
+
+        <div class="edu-item">
+          <div class="edu-qual">BA Marketing</div>
+          <div class="edu-inst">University of Liverpool</div>
+          <div class="edu-meta">
+            <span class="edu-dates">2018 — 2021</span>
+            <span class="edu-grade">2:1 Honours</span>
+          </div>
+        </div>
+
+        <div class="edu-item">
+          <div class="edu-qual">A Levels</div>
+          <div class="edu-inst">Coleg Gwent, Crosskeys</div>
+          <div class="edu-meta">
+            <span class="edu-dates">2015 — 2018</span>
+            <span class="edu-grade">A – C + Welsh Bacc</span>
+          </div>
+        </div>
+
+        <div class="edu-item">
+          <div class="edu-qual">GCSEs</div>
+          <div class="edu-inst">Blackwood Comprehensive</div>
+          <div class="edu-meta">
+            <span class="edu-dates">2010 — 2015</span>
+            <span class="edu-grade">11 GCSEs, A – C</span>
+          </div>
         </div>
 
       </div>
@@ -599,47 +675,46 @@
           <div class="comp-tags">
             <span class="comp-tag">Power BI</span>
             <span class="comp-tag">DAX</span>
+            <span class="comp-tag">Analytics Plus</span>
             <span class="comp-tag">Power Query / M</span>
-            <span class="comp-tag">Tabular Editor</span>
-            <span class="comp-tag">DAX Studio</span>
-            <span class="comp-tag">SSRS</span>
             <span class="comp-tag">Tableau</span>
+            <span class="comp-tag">Advanced Excel</span>
+            <span class="comp-tag">Data Visualisation</span>
           </div>
         </div>
 
         <div class="comp-group">
-          <div class="comp-label"><span class="cmt">-- Data Engineering &amp; SQL</span></div>
+          <div class="comp-label"><span class="cmt">-- Data &amp; Programming</span></div>
           <div class="comp-tags">
-            <span class="comp-tag">T-SQL</span>
-            <span class="comp-tag">PySpark</span>
+            <span class="comp-tag">Advanced SQL</span>
             <span class="comp-tag">Python</span>
-            <span class="comp-tag">ETL / ELT Design</span>
+            <span class="comp-tag">R</span>
+            <span class="comp-tag">Machine Learning</span>
             <span class="comp-tag">Data Modelling</span>
-            <span class="comp-tag">Star Schema</span>
-            <span class="comp-tag">Data Warehousing</span>
+            <span class="comp-tag">API Integration</span>
+            <span class="comp-tag">XML</span>
           </div>
         </div>
 
         <div class="comp-group">
-          <div class="comp-label"><span class="cmt">-- Azure Platform</span></div>
+          <div class="comp-label"><span class="cmt">-- Platform &amp; Architecture</span></div>
           <div class="comp-tags">
-            <span class="comp-tag">Data Factory</span>
-            <span class="comp-tag">Synapse Analytics</span>
-            <span class="comp-tag">Databricks</span>
             <span class="comp-tag">Microsoft Fabric</span>
-            <span class="comp-tag">Azure SQL</span>
-            <span class="comp-tag">Power BI Premium</span>
+            <span class="comp-tag">Azure</span>
+            <span class="comp-tag">Data Warehouse</span>
+            <span class="comp-tag">Data Lakehouse</span>
+            <span class="comp-tag">ServiceDesk Plus</span>
           </div>
         </div>
 
         <div class="comp-group">
-          <div class="comp-label"><span class="cmt">-- Dev &amp; Delivery</span></div>
+          <div class="comp-label"><span class="cmt">-- Process &amp; Standards</span></div>
           <div class="comp-tags">
-            <span class="comp-tag">Git</span>
-            <span class="comp-tag">Azure DevOps</span>
-            <span class="comp-tag">CI/CD Pipelines</span>
-            <span class="comp-tag">Agile / Scrum</span>
+            <span class="comp-tag">ITIL 4 Foundation</span>
+            <span class="comp-tag">Process Improvement</span>
             <span class="comp-tag">Stakeholder Reporting</span>
+            <span class="comp-tag">Data Governance</span>
+            <span class="comp-tag">Critical Thinking</span>
           </div>
         </div>
 
@@ -669,7 +744,7 @@
     });
   }, { rootMargin: '-15% 0px -70% 0px' });
 
-  ['profile', 'experience', 'competencies'].forEach(id => {
+  ['profile', 'experience', 'education', 'competencies'].forEach(id => {
     const el = document.getElementById(id);
     if (el) observer.observe(el);
   });
