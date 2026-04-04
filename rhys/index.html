@@ -489,9 +489,9 @@
       <div class="kpi-sub">Years in data roles</div>
     </div>
     <div class="kpi teal">
-      <div class="kpi-label">SUM(weekly_reports)</div>
-      <div class="kpi-val">14</div>
-      <div class="kpi-sub">Weekly reports at MJ Quinn</div>
+      <div class="kpi-label">CALC(output_growth)</div>
+      <div class="kpi-val">133%</div>
+      <div class="kpi-sub">Reporting output increase</div>
     </div>
     <div class="kpi orange">
       <div class="kpi-label">COUNT(DISTINCT languages)</div>
@@ -731,6 +731,9 @@
 </div>
 
 <script>
+  if (history.scrollRestoration) history.scrollRestoration = 'manual';
+  window.scrollTo(0, 0);
+
   const tabs    = document.querySelectorAll('.nav-tab');
   const current = document.getElementById('nav-current');
 
