@@ -357,66 +357,6 @@
       color: var(--bright);
     }
 
-    /* ── PROJECTS / LAB ── */
-    .projects-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 1rem;
-    }
-
-    .project-card {
-      background: var(--ui-bg);
-      border: 2px solid var(--ui-border);
-      padding: 1.4rem 1.6rem;
-      position: relative;
-      text-decoration: none;
-      display: block;
-      transition: border-color 0.2s, transform 0.15s;
-    }
-    .project-card::before {
-      content: '';
-      position: absolute;
-      inset: 3px;
-      border: 1px solid rgba(24,80,160,0.2);
-      pointer-events: none;
-    }
-    .project-card:hover {
-      border-color: var(--gold);
-      transform: translateY(-2px);
-    }
-
-    .project-icon {
-      font-size: 2rem;
-      margin-bottom: 0.6rem;
-      display: block;
-    }
-
-    .project-name {
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.52rem;
-      color: var(--bright);
-      line-height: 1.8;
-      letter-spacing: 0.03em;
-    }
-
-    .project-desc {
-      font-size: 1.2rem;
-      color: var(--parchment);
-      margin-top: 0.5rem;
-      line-height: 1.6;
-    }
-
-    .project-tag {
-      display: inline-block;
-      font-family: 'Press Start 2P', monospace;
-      font-size: 0.36rem;
-      color: var(--teal);
-      border: 1px solid rgba(24,168,176,0.35);
-      padding: 0.2rem 0.5rem;
-      margin-top: 0.75rem;
-      letter-spacing: 0.04em;
-    }
-
     /* ── CERTIFICATIONS ── */
     .certs-grid {
       display: grid;
@@ -828,7 +768,6 @@
     <div class="hero-cta">
       <a href="#contact" class="cta-btn primary">Get in Touch</a>
       <a href="#experience" class="cta-btn ghost">View Experience</a>
-      <a href="#projects" class="cta-btn ghost">📈 Lab</a>
     </div>
   </div>
 
@@ -920,24 +859,6 @@
         <span class="skill-tag">Asset Management</span>
         <span class="skill-tag">Microsoft Windows and Office</span>
       </div>
-    </div>
-  </section>
-
-  <!-- ═══ PROJECTS / LAB ═══ -->
-  <section id="projects">
-    <div class="section-header">Lab</div>
-    <div class="projects-grid">
-
-      <a href="../stock-forecast/" class="project-card" style="border-color: var(--teal);">
-        <span class="project-icon">📈</span>
-        <div class="project-name">Stock Forecaster</div>
-        <p class="project-desc">
-          TimesFM 2.5 pipeline — select a ticker, choose your horizon,
-          and generate a probabilistic price forecast with confidence bands.
-        </p>
-        <span class="project-tag">TimesFM · Python · Chart.js</span>
-      </a>
-
     </div>
   </section>
 
