@@ -1,3 +1,4 @@
 .venv/
+timesfm/
 __pycache__/
 *.pyc
