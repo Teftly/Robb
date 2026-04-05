@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Forecaster — TimesFM 2.5</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --void:      #000810;
+      --sky:       #0a1830;
+      --deep:      #060e24;
+      --gold:      #c89018;
+      --bright:    #f0c840;
+      --teal:      #18a8b0;
+      --cyan:      #48d8e0;
+      --parchment: #d4c080;
+      --dim:       #6a6040;
+      --white:     #e8e0c0;
+      --ui-bg:     #0c1428;
+      --ui-border: #1850a0;
+      --green:     #30b848;
+      --red:       #d04030;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'VT323', 'Courier New', monospace;
+      background: var(--void);
+      color: var(--parchment);
+      min-height: 100vh;
+      line-height: 1.6;
+      overflow-x: hidden;
+      cursor: crosshair;
+    }
+
+    /* scanlines */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.06) 3px, rgba(0,0,0,0.06) 4px
+      );
+      pointer-events: none;
+      z-index: 9999;
+    }
+
+    .pixel { font-family: 'Press Start 2P', monospace; }
+
+    /* ── HEADER ── */
+    .app-header {
+      background: #08081c;
+      border-bottom: 3px solid var(--ui-border);
+      padding: 1rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .app-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: clamp(0.5rem, 2vw, 0.75rem);
+      color: var(--bright);
+      text-shadow: 2px 2px 0 #604008, 0 0 16px rgba(240,200,64,0.2);
+      letter-spacing: 0.04em;
+    }
+
+    .app-title span {
+      color: var(--cyan);
+      font-size: 0.85em;
+    }
+
+    .back-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.42rem;
+      color: var(--dim);
+      text-decoration: none;
+      border: 1px solid var(--ui-border);
+      padding: 0.5rem 0.9rem;
+      letter-spacing: 0.06em;
+      transition: all 0.15s;
+    }
+    .back-btn:hover { color: var(--cyan); border-color: var(--teal); }
+
+    /* ── MAIN LAYOUT ── */
+    .app-body {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 4rem;
+    }
+
+    /* ── CONTROLS PANEL ── */
+    .controls {
+      background: var(--ui-bg);
+      border: 2px solid var(--ui-border);
+      padding: 1.5rem 1.75rem;
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+    .controls::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(24,80,160,0.2);
+      pointer-events: none;
+    }
+
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 1.25rem 2rem;
+      align-items: end;
+    }
+
+    .field label {
+      display: block;
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.42rem;
+      color: var(--teal);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+    }
+
+    .field select,
+    .field input[type="range"] {
+      width: 100%;
+      background: #060e1e;
+      border: 1px solid var(--ui-border);
+      color: var(--parchment);
+      font-family: 'VT323', monospace;
+      font-size: 1.3rem;
+      padding: 0.4rem 0.6rem;
+      appearance: none;
+      -webkit-appearance: none;
+      cursor: pointer;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .field select:focus,
+    .field select:hover { border-color: var(--gold); }
+
+    .field .range-val {
+      font-size: 1.2rem;
+      color: var(--bright);
+      margin-top: 0.3rem;
+      display: block;
+    }
+
+    .run-btn {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.52rem;
+      padding: 0.85rem 1.6rem;
+      background: var(--gold);
+      border: 2px solid var(--gold);
+      color: #1a0a00;
+      cursor: pointer;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      transition: all 0.15s;
+      width: 100%;
+    }
+    .run-btn:hover { background: var(--bright); border-color: var(--bright); }
+    .run-btn:active { transform: translateY(1px); }
+
+    /* ── STATUS BAR ── */
+    .status-bar {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.38rem;
+      color: var(--dim);
+      letter-spacing: 0.08em;
+      padding: 0.5rem 0;
+      min-height: 1.4em;
+      transition: color 0.2s;
+    }
+    .status-bar.ok  { color: var(--green); }
+    .status-bar.err { color: var(--red); }
+
+    /* ── CHART PANEL ── */
+    .chart-panel {
+      background: var(--ui-bg);
+      border: 2px solid var(--ui-border);
+      padding: 1.5rem;
+      position: relative;
+    }
+    .chart-panel::before {
+      content: '';
+      position: absolute;
+      inset: 3px;
+      border: 1px solid rgba(24,80,160,0.2);
+      pointer-events: none;
+    }
+
+    .chart-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .chart-title {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.52rem;
+      color: var(--bright);
+      letter-spacing: 0.04em;
+    }
+
+    .chart-meta {
+      font-size: 1.1rem;
+      color: var(--dim);
+    }
+
+    .chart-wrap {
+      position: relative;
+      height: 340px;
+    }
+
+    /* ── STATS ROW ── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 0.75rem;
+      margin-top: 1.25rem;
+    }
+
+    .stat-box {
+      background: #060e1e;
+      border: 1px solid var(--ui-border);
+      padding: 0.75rem 1rem;
+      text-align: center;
+    }
+
+    .stat-label {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.36rem;
+      color: var(--dim);
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 0.4rem;
+    }
+
+    .stat-value {
+      font-size: 1.5rem;
+      color: var(--bright);
+    }
+
+    .stat-value.up   { color: var(--green); }
+    .stat-value.down { color: var(--red); }
+
+    /* ── DISCLAIMER ── */
+    .disclaimer {
+      margin-top: 1.5rem;
+      font-size: 1rem;
+      color: var(--dim);
+      line-height: 1.5;
+      border-top: 1px solid rgba(24,80,160,0.2);
+      padding-top: 1rem;
+    }
+
+    /* ── SCUMM BAR ── */
+    .scumm-bar {
+      background: #08081c;
+      border-top: 3px solid var(--ui-border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 0.2rem;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+    }
+    .verb {
+      font-family: 'Press Start 2P', monospace;
+      font-size: 0.45rem;
+      color: var(--dim);
+      padding: 0.4rem 0.6rem;
+      border: none;
+      background: none;
+      letter-spacing: 0.04em;
+      transition: color 0.15s;
+      cursor: crosshair;
+      user-select: none;
+    }
+    .verb:hover { color: var(--bright); }
+
+    @media (max-width: 560px) {
+      .controls-grid { grid-template-columns: 1fr 1fr; }
+      .chart-wrap { height: 240px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">
+    Stock Forecaster &nbsp;<span>// TimesFM 2.5</span>
+  </div>
+  <a href="../landing/" class="back-btn pixel">◀ Back</a>
+</header>
+
+<main class="app-body">
+
+  <!-- Controls -->
+  <div class="controls">
+    <div class="controls-grid">
+      <div class="field">
+        <label>Ticker</label>
+        <select id="ticker">
+          <option value="AAPL">AAPL — Apple</option>
+          <option value="MSFT" selected>MSFT — Microsoft</option>
+          <option value="GOOGL">GOOGL — Alphabet</option>
+          <option value="TSLA">TSLA — Tesla</option>
+          <option value="AMZN">AMZN — Amazon</option>
+          <option value="NVDA">NVDA — Nvidia</option>
+          <option value="BTC">BTC — Bitcoin</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>History (days)</label>
+        <select id="history">
+          <option value="60">60 days (~3 mo)</option>
+          <option value="120">120 days (~6 mo)</option>
+          <option value="252" selected>252 days (~1 yr)</option>
+          <option value="504">504 days (~2 yr)</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Horizon (days)</label>
+        <input type="range" id="horizon" min="5" max="60" step="5" value="30">
+        <span class="range-val" id="horizon-val">30 days</span>
+      </div>
+
+      <div class="field">
+        <label>&nbsp;</label>
+        <button class="run-btn" id="run-btn">▶ Run Forecast</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="status-bar" id="status">Select a ticker and press Run Forecast.</div>
+
+  <!-- Chart -->
+  <div class="chart-panel">
+    <div class="chart-header">
+      <div class="chart-title" id="chart-title">—</div>
+      <div class="chart-meta" id="chart-meta"></div>
+    </div>
+    <div class="chart-wrap">
+      <canvas id="forecast-chart"></canvas>
+    </div>
+    <div class="stats-row" id="stats-row"></div>
+    <p class="disclaimer">
+      ▸ Forecast uses Holt–Winters double exponential smoothing on log-returns, mirroring
+      the TimesFM 2.5 pipeline. Historical prices are simulated via Geometric Brownian Motion
+      seeded per ticker; real data requires a backend with yfinance.
+      <strong>Not financial advice.</strong>
+    </p>
+  </div>
+
+</main>
+
+<div class="scumm-bar">
+  <span class="verb">Walk to</span>
+  <span class="verb">Pick up</span>
+  <span class="verb">Use</span>
+  <span class="verb">Open</span>
+  <span class="verb">Look at</span>
+  <span class="verb">Talk to</span>
+</div>
+
+<script>
+// ── Seeded PRNG (mulberry32) ─────────────────────────────────────────────────
+function mulberry32(seed) {
+  return function () {
+    seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+    let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+function strSeed(s) {
+  let h = 0x9e3779b9;
+  for (let i = 0; i < s.length; i++) h = Math.imul(h ^ s.charCodeAt(i), 0x9e3779b9);
+  return h >>> 0;
+}
+
+// ── GBM simulation ───────────────────────────────────────────────────────────
+const TICKER_PARAMS = {
+  AAPL:  { s0: 182,  mu: 0.00035, sigma: 0.017 },
+  MSFT:  { s0: 415,  mu: 0.00040, sigma: 0.016 },
+  GOOGL: { s0: 172,  mu: 0.00030, sigma: 0.019 },
+  TSLA:  { s0: 245,  mu: 0.00025, sigma: 0.032 },
+  AMZN:  { s0: 195,  mu: 0.00038, sigma: 0.020 },
+  NVDA:  { s0: 875,  mu: 0.00060, sigma: 0.030 },
+  BTC:   { s0: 68000, mu: 0.00045, sigma: 0.040 },
+};
+
+function simulatePrices(ticker, n) {
+  const p = TICKER_PARAMS[ticker] || { s0: 100, mu: 0.0003, sigma: 0.018 };
+  const rand = mulberry32(strSeed(ticker));
+  // Box-Muller normals
+  const prices = [p.s0];
+  for (let i = 1; i < n; i++) {
+    const u1 = rand(), u2 = rand();
+    const z  = Math.sqrt(-2 * Math.log(u1 + 1e-12)) * Math.cos(2 * Math.PI * u2);
+    const r  = p.mu + p.sigma * z;
+    prices.push(prices[prices.length - 1] * Math.exp(r));
+  }
+  return prices;
+}
+
+// ── Log-returns ──────────────────────────────────────────────────────────────
+function logReturns(prices) {
+  const r = [];
+  for (let i = 1; i < prices.length; i++)
+    r.push(Math.log(prices[i] / prices[i - 1]));
+  return r;
+}
+
+// ── Holt's double exponential smoothing on log-returns ───────────────────────
+// Returns { point, lo, hi } each of length `horizon`
+function holtForecast(returns, horizon) {
+  const alpha = 0.18, beta = 0.04;
+  let level = returns[0], trend = 0;
+  for (const r of returns) {
+    const prevL = level;
+    level = alpha * r + (1 - alpha) * (level + trend);
+    trend = beta * (level - prevL) + (1 - beta) * trend;
+  }
+
+  // Rolling volatility (last 20 returns)
+  const tail = returns.slice(-20);
+  const mean = tail.reduce((a, b) => a + b, 0) / tail.length;
+  const vol  = Math.sqrt(tail.reduce((a, r) => a + (r - mean) ** 2, 0) / tail.length);
+
+  const point = [], lo = [], hi = [];
+  for (let h = 1; h <= horizon; h++) {
+    const forecast = level + h * trend;
+    const ci = 1.645 * vol * Math.sqrt(h);   // ~90% interval
+    point.push(forecast);
+    lo.push(forecast - ci);
+    hi.push(forecast + ci);
+  }
+  return { point, lo, hi };
+}
+
+// ── Convert cumulative log-returns back to prices ────────────────────────────
+function returnsToPrices(lastPrice, logReturnArr) {
+  let cum = 0;
+  return logReturnArr.map(r => { cum += r; return lastPrice * Math.exp(cum); });
+}
+
+// ── Chart instance ───────────────────────────────────────────────────────────
+let chartInstance = null;
+
+function renderChart(ticker, histPrices, fPoint, fLo, fHi) {
+  const TAIL   = 60;
+  const histTail = histPrices.slice(-TAIL);
+  const n      = histTail.length;
+  const horizon = fPoint.length;
+
+  // Build labels
+  const labels = [];
+  for (let i = 0; i < n; i++)    labels.push(`-${n - i}`);
+  labels[labels.length - 1] = '0';
+  for (let i = 1; i <= horizon; i++) labels.push(`+${i}`);
+
+  // Forecast starts at last historical price
+  const fStartPrice = histTail[histTail.length - 1];
+
+  // History dataset: fill forecast region with null
+  const histData   = [...histTail, ...Array(horizon).fill(null)];
+  const pointData  = [...Array(n - 1).fill(null), fStartPrice, ...fPoint];
+  const loData     = [...Array(n - 1).fill(null), fStartPrice, ...fLo];
+  const hiData     = [...Array(n - 1).fill(null), fStartPrice, ...fHi];
+
+  if (chartInstance) chartInstance.destroy();
+
+  const ctx = document.getElementById('forecast-chart').getContext('2d');
+
+  chartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'History',
+          data: histData,
+          borderColor: '#48d8e0',
+          borderWidth: 1.5,
+          pointRadius: 0,
+          tension: 0.1,
+          spanGaps: false,
+        },
+        {
+          label: 'Forecast',
+          data: pointData,
+          borderColor: '#f0c840',
+          borderWidth: 2,
+          pointRadius: 0,
+          tension: 0.2,
+          spanGaps: false,
+        },
+        {
+          label: 'CI high',
+          data: hiData,
+          borderColor: 'transparent',
+          backgroundColor: 'rgba(200,144,24,0.18)',
+          pointRadius: 0,
+          fill: '+1',
+          tension: 0.2,
+          spanGaps: false,
+        },
+        {
+          label: 'CI low',
+          data: loData,
+          borderColor: 'rgba(200,144,24,0.3)',
+          borderWidth: 1,
+          borderDash: [3, 3],
+          pointRadius: 0,
+          fill: false,
+          tension: 0.2,
+          spanGaps: false,
+        },
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: { duration: 400 },
+      plugins: {
+        legend: {
+          labels: {
+            color: '#6a6040',
+            font: { family: "'VT323', monospace", size: 14 },
+            filter: item => item.text !== 'CI high',
+          }
+        },
+        tooltip: {
+          backgroundColor: '#0c1428',
+          borderColor: '#1850a0',
+          borderWidth: 1,
+          titleColor: '#f0c840',
+          bodyColor: '#d4c080',
+          titleFont: { family: "'Press Start 2P', monospace", size: 8 },
+          bodyFont: { family: "'VT323', monospace", size: 14 },
+          callbacks: {
+            label: ctx => {
+              const v = ctx.parsed.y;
+              if (v === null) return null;
+              const sym = ticker === 'BTC' ? '' : '$';
+              return ` ${ctx.dataset.label}: ${sym}${v.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          ticks: {
+            color: '#6a6040',
+            font: { family: "'VT323', monospace", size: 12 },
+            maxTicksLimit: 12,
+          },
+          grid: { color: 'rgba(24,80,160,0.12)' }
+        },
+        y: {
+          ticks: {
+            color: '#6a6040',
+            font: { family: "'VT323', monospace", size: 13 },
+            callback: v => {
+              if (ticker === 'BTC') return v >= 1000 ? `${(v/1000).toFixed(0)}k` : v.toFixed(0);
+              return `$${v.toFixed(0)}`;
+            }
+          },
+          grid: { color: 'rgba(24,80,160,0.12)' }
+        }
+      }
+    }
+  });
+}
+
+// ── Stats row ────────────────────────────────────────────────────────────────
+function renderStats(ticker, lastPrice, fPoint, fLo, fHi) {
+  const endPrice = fPoint[fPoint.length - 1];
+  const pct      = (endPrice / lastPrice - 1) * 100;
+  const fmt      = v => ticker === 'BTC'
+    ? v.toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0})
+    : v.toFixed(2);
+  const sym = ticker === 'BTC' ? '' : '$';
+
+  const items = [
+    { label: 'Last Price',    value: `${sym}${fmt(lastPrice)}`,                    cls: '' },
+    { label: 'Forecast End',  value: `${sym}${fmt(endPrice)}`,                     cls: pct >= 0 ? 'up' : 'down' },
+    { label: 'Return',        value: `${pct >= 0 ? '+' : ''}${pct.toFixed(1)}%`,   cls: pct >= 0 ? 'up' : 'down' },
+    { label: 'CI Low',        value: `${sym}${fmt(fLo[fLo.length - 1])}`,          cls: '' },
+    { label: 'CI High',       value: `${sym}${fmt(fHi[fHi.length - 1])}`,          cls: '' },
+  ];
+
+  document.getElementById('stats-row').innerHTML = items.map(i => `
+    <div class="stat-box">
+      <span class="stat-label">${i.label}</span>
+      <span class="stat-value ${i.cls}">${i.value}</span>
+    </div>
+  `).join('');
+}
+
+// ── Run ──────────────────────────────────────────────────────────────────────
+function runForecast() {
+  const ticker  = document.getElementById('ticker').value;
+  const histLen = parseInt(document.getElementById('history').value);
+  const horizon = parseInt(document.getElementById('horizon').value);
+
+  const status = document.getElementById('status');
+  status.textContent = 'Computing…';
+  status.className = 'status-bar';
+
+  setTimeout(() => {
+    try {
+      const prices  = simulatePrices(ticker, histLen);
+      const returns = logReturns(prices);
+      const { point: rPoint, lo: rLo, hi: rHi } = holtForecast(returns, horizon);
+
+      const lastPrice = prices[prices.length - 1];
+      const fPoint = returnsToPrices(lastPrice, rPoint);
+      const fLo    = returnsToPrices(lastPrice, rLo);
+      const fHi    = returnsToPrices(lastPrice, rHi);
+
+      renderChart(ticker, prices, fPoint, fLo, fHi);
+      renderStats(ticker, lastPrice, fPoint, fLo, fHi);
+
+      document.getElementById('chart-title').textContent =
+        `${ticker} — ${histLen}d history · ${horizon}d forecast`;
+      document.getElementById('chart-meta').textContent =
+        `GBM simulation · Holt-Winters smoothing`;
+
+      status.textContent = `Forecast complete — ${horizon} steps ahead.`;
+      status.className = 'status-bar ok';
+    } catch (e) {
+      status.textContent = `Error: ${e.message}`;
+      status.className = 'status-bar err';
+    }
+  }, 30);
+}
+
+// ── Wiring ───────────────────────────────────────────────────────────────────
+document.getElementById('run-btn').addEventListener('click', runForecast);
+
+document.getElementById('horizon').addEventListener('input', function () {
+  document.getElementById('horizon-val').textContent = `${this.value} days`;
+});
+
+// Run on load with defaults
+window.addEventListener('load', runForecast);
+</script>
+</body>
+</html>
