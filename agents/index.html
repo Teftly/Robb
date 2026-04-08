@@ -360,44 +360,54 @@ let editing = null; // slot index being edited
 
 const defaults = [
   {
-    name: 'analyst',
-    role: 'Code quality scanner',
-    prompt: 'You are a senior code analyst. Read files, identify issues, cite file paths and line numbers.',
-    greeting: 'Ready. Ask me to scan a file, directory, or the whole codebase.'
+    name: 'Planner',
+    role: 'Orchestrator — task decomposition',
+    prompt: 'You are the Planner. Produce a minimal task decomposition, assign ownership to agents, and define explicit success criteria. Do NOT propose solutions or write outputs.',
+    greeting: 'Ready. Give me a task and I\'ll decompose it, assign ownership, and define success criteria. I will not propose solutions or write outputs.'
   },
   {
-    name: 'web-dev',
-    role: 'HTML / CSS / JS',
-    prompt: 'You are a front-end developer. Apply targeted fixes based on the analyst\'s findings.',
-    greeting: 'Standing by. Send me a component or a list of issues to fix.'
+    name: 'Specialist A',
+    role: 'Domain / research',
+    prompt: 'You are Specialist A. Complete ONLY your assigned task. State assumptions explicitly and list uncertainties.',
+    greeting: 'Standing by for my assigned task. I\'ll return findings, assumptions, and risks — nothing else.'
   },
   {
-    name: 'python-dev',
-    role: 'Python / pipelines',
-    prompt: 'You are a Python developer. Add type hints, docstrings, and improve error handling.',
-    greeting: 'Online. Give me a Python file or a specific task.'
+    name: 'Specialist B',
+    role: 'Implementation / drafting',
+    prompt: 'You are Specialist B. Produce the artefact only. Optimise for correctness over elegance. Do not explain your choices.',
+    greeting: 'Ready to produce the artefact. Send me the Planner task and Specialist A\'s findings summary.'
   },
-  null,
-  null,
+  {
+    name: 'Reviewer',
+    role: 'Adversarial reviewer',
+    prompt: 'You are the Reviewer. Assume the artefact is wrong. Actively attempt to break it. Surface risks, gaps, and failures. Do NOT rewrite the artefact.',
+    greeting: 'Assuming the artefact is wrong. Send it to me and I\'ll find every flaw, gap, and risk — with severity and evidence.'
+  },
+  {
+    name: 'Synthesiser',
+    role: 'Final authority',
+    prompt: 'You are the Synthesiser. Resolve reviewer issues where possible. Surface unresolved risks explicitly. Produce the final output only.',
+    greeting: 'Awaiting all prior outputs. I\'ll resolve the Reviewer\'s issues, surface anything unresolvable, and deliver the final answer.'
+  },
 ];
 
 function load() {
   try {
-    const s = localStorage.getItem('robb-agents-v2');
+    const s = localStorage.getItem('robb-agents-v3');
     if (s) return JSON.parse(s);
   } catch {}
-  return defaults.map((d, i) => d ? {
+  return defaults.map((d, i) => ({
     slot: i,
     name: d.name,
     role: d.role,
     prompt: d.prompt,
     msgs: [{ from: 'them', text: d.greeting }],
     busy: false
-  } : null);
+  }));
 }
 
 function persist(slots) {
-  localStorage.setItem('robb-agents-v2', JSON.stringify(slots));
+  localStorage.setItem('robb-agents-v3', JSON.stringify(slots));
 }
 
 let slots = load();
@@ -407,7 +417,7 @@ function render() {
   const grid = document.getElementById('grid');
   grid.innerHTML = '';
   slots.forEach((slot, i) => {
-    grid.appendChild(slot ? buildWin(slot, i) : buildEmpty(i));
+    grid.appendChild(buildWin(slot, i));
   });
 }
 
@@ -516,19 +526,25 @@ function setBusy(i, busy) {
 }
 
 function reply(slot, task) {
-  const t = task.toLowerCase();
-  if (slot.name === 'analyst') {
-    if (t.includes('scan') || t.includes('all') || t.includes('everything'))
-      return `Starting scan…\n\nTo run for real:\npython agents.py "${task}"`;
-    return `Analysing: "${task}"\n\nRun: python agents.py "${task}"`;
+  switch (slot.name) {
+    case 'Planner':
+      return `Task decomposition for: "${task}"\n\n1. Research phase → Specialist A\n2. Artefact creation → Specialist B\n3. Adversarial review → Reviewer\n4. Final resolution → Synthesiser\n\nSuccess criteria: deliverable is correct, complete, and risks are surfaced.\n\nRun the full workflow:\npython agents.py "${task}"`;
+
+    case 'Specialist A':
+      return `Findings for: "${task}"\n\nAssumptions:\n— [state any assumptions here]\n\nRisks / uncertainties:\n— [list what isn't known]\n\nTo execute:\npython agents.py "${task}"`;
+
+    case 'Specialist B':
+      return `Artefact produced for: "${task}"\n\n[Single clean output — no justification, no commentary.]\n\nTo execute:\npython agents.py "${task}"`;
+
+    case 'Reviewer':
+      return `Review of artefact for: "${task}"\n\nIssues found:\n\n[SEVERITY: HIGH]\nEvidence: —\nFix: —\n\nTo execute:\npython agents.py "${task}"`;
+
+    case 'Synthesiser':
+      return `Final output for: "${task}"\n\nResolved issues: [list]\nResidual risks: [list any unresolved items explicitly]\n\n[Final answer here.]\n\nTo execute:\npython agents.py "${task}"`;
+
+    default:
+      return `Received: "${task}"\n\nRun: python agents.py "${task}"`;
   }
-  if (slot.name === 'web-dev') {
-    return `On it. I'll apply targeted fixes.\n\nRun: python agents.py "${task}"`;
-  }
-  if (slot.name === 'python-dev') {
-    return `Python task received.\n\nRun: python agents.py "${task}"`;
-  }
-  return `Received: "${task}"\n\nRun: python agents.py "${task}"`;
 }
 
 // ── modal ──────────────────────────────────────
